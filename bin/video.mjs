@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { execFileSync, spawnSync } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, mkdirSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import {
@@ -85,6 +85,7 @@ switch (cmd) {
   }
   case "snapshot": {
     cleanTempProfiles();
+    mkdirSync(join(PROJ_DIR, "preview"), { recursive: true });
     const atIdx = args.indexOf("--at");
     const at = atIdx !== -1 ? args[atIdx + 1] : "1.0";
     const oIdx = args.indexOf("-o");
@@ -99,6 +100,7 @@ switch (cmd) {
   }
   case "render": {
     cleanTempProfiles();
+    mkdirSync(join(PROJ_DIR, "renders"), { recursive: true });
     if (mode === "production") {
       log("TTS", "Ensuring MiMo-v2.5-TTS production audio is active...");
       execFileSync("python", ["core/tts/engine.py", "--project-dir", PROJ_DIR, "--mode", "production"], {
@@ -110,7 +112,7 @@ switch (cmd) {
       await compileProject(PROJ_DIR);
     }
     const outIdx = args.findIndex((a) => a.endsWith(".mp4"));
-    const out = outIdx !== -1 ? args[outIdx] : "renders/out.mp4";
+    const out = outIdx !== -1 ? args[outIdx] : `renders/${projName}.mp4`;
     log("RENDER", `Rendering video to ${out} (fps: 30)...`);
     execFileSync("node", [HF_CLI, "render", ".", "-o", out, "-f", "30", "-w", "1", "-q", "looks"], {
       cwd: PROJ_DIR,
