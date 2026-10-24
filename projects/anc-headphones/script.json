@@ -1,0 +1,12 @@
+[
+  {
+    "id": "01-intro",
+    "voice": "zh-CN-YunxiNeural",
+    "text": "降噪耳机的秘密，在于它不是挡住声音，而是制造声音。"
+  },
+  {
+    "id": "02-anti-wave",
+    "voice": "zh-CN-YunxiNeural",
+    "text": "麦克风拾取外界噪声，芯片在微秒内计算出相位相反的反向声波，两者叠加抵消，瞬间静音。"
+  }
+]

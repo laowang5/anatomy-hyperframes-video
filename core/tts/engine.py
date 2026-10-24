@@ -15,11 +15,7 @@ import argparse
 import subprocess
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
-SCRIPT_PATH = ROOT / "geo" / "script.json"
-voice_dir = ROOT / "assets" / "voice"
-timing_file = voice_dir / "timing.json"
-manifest_file = voice_dir / "manifest.json"
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 
 # ── 中文多音字与机械键盘专有术语发音纠偏表（音画解耦：画面显示规范字，语音采用明确单音字）──
 PRONUNCIATION_OVERRIDES = {
@@ -55,8 +51,8 @@ def resolve_mimo_key() -> str:
     if key:
         return key
     candidate_envs = [
-        ROOT / ".env",
-        ROOT.parent / "video-team" / ".env",
+        REPO_ROOT / ".env",
+        REPO_ROOT.parent / "video-team" / ".env",
         Path("G:/Workspace/video-team/.env"),
     ]
     for env_file in candidate_envs:
@@ -392,8 +388,14 @@ async def main():
     print(f"\n{'━'*60}")
     print(f"  ✅ 音频全量生成完毕！")
     print(f"  📊 总场景数: {len(scenes)} | 总音频时长: {total_duration:.2f}s")
-    print(f"  📄 词级时间戳已导出: {timing_file.relative_to(ROOT)}")
-    print(f"  📄 音频清单已更新: {manifest_file.relative_to(ROOT)}")
+    try:
+        rel_timing = timing_file.relative_to(REPO_ROOT)
+        rel_manifest = manifest_file.relative_to(REPO_ROOT)
+    except Exception:
+        rel_timing = timing_file
+        rel_manifest = manifest_file
+    print(f"  📄 词级时间戳已导出: {rel_timing}")
+    print(f"  📄 音频清单已更新: {rel_manifest}")
     print(f"{'━'*60}\n")
 
 if __name__ == "__main__":
