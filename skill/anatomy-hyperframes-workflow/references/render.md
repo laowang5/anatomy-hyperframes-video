@@ -10,19 +10,34 @@ HYPERFRAMES_BROWSER_PATH     # or PRODUCER_HEADLESS_SHELL_PATH
 
 `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` is **not** read by the CLI — setting it changes nothing and costs you twenty minutes.
 
+### Automatic Dynamic Resolution (`core/config.mjs`)
+Never hardcode specific version numbers in scripts. Use dynamic sniffing:
+```javascript
+export function resolveChromePath() {
+  if (process.env.HYPERFRAMES_BROWSER_PATH && existsSync(process.env.HYPERFRAMES_BROWSER_PATH)) {
+    return process.env.HYPERFRAMES_BROWSER_PATH;
+  }
+  const baseCache = "C:/Users/Administrator/.cache/hyperframes/chrome/chrome-headless-shell";
+  if (existsSync(baseCache)) {
+    for (const v of readdirSync(baseCache)) {
+      const candidate = join(baseCache, v, "chrome-headless-shell-win64", "chrome-headless-shell.exe");
+      if (existsSync(candidate)) return candidate;
+    }
+  }
+  return null;
+}
 ```
-export HYPERFRAMES_BROWSER_PATH="C:/Users/<you>/.cache/hyperframes/chrome/chrome-headless-shell/win64-131.0.6778.85/chrome-headless-shell-win64/chrome-headless-shell.exe"
+
+### Multi-Workspace Sandbox Execution Protocol
+When invoking HyperFrames on a project sandbox (`projects/<name>`), **always set the child process working directory to the project directory**:
+```javascript
+execFileSync("node", [HF_CLI, "render", ".", "-o", outFile, "-f", "30", "-w", "1", "-q", "looks"], {
+  cwd: projectDir,
+  env: { ...process.env, HYPERFRAMES_BROWSER_PATH: resolveChromePath() },
+  stdio: "inherit"
+});
 ```
-
-Find one locally with, in order of preference:
-
-1. `~/.cache/hyperframes/chrome/chrome-headless-shell/` — the CLI's own cache, if a previous install put one there.
-2. `~/.cache/puppeteer/chrome/` — puppeteer's cache.
-3. `%LOCALAPPDATA%\ms-playwright\` — playwright's cache; look for `chromium_headless_shell-*/chrome-headless-shell-win64/`.
-
-`hyperframes browser path` reports the resolved path. `hyperframes browser ensure` **downloads** one — with no network it hangs, so kill it and point the variable at something local instead.
-
-**In a sandbox that forbids `child_process.spawn`, a plain `chrome --headless --screenshot` will not work either** — the crashpad handler fails to open a process handle and the browser self-terminates with `crashpad_client_win.cc:430 OpenProcess: 拒绝访问`. The CLI launches Chrome through CDP, which works. So route everything through `hyperframes render`, not a hand-rolled screenshot script.
+This guarantees HyperFrames resolves relative assets, fonts, and compositions strictly inside `projects/<name>` with zero root pollution.
 
 ## Running the CLI
 

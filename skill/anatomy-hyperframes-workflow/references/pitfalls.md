@@ -190,3 +190,56 @@ for (const dir of readdirSync(tmpDir)) {
 }
 ```
 And explicitly set `HYPERFRAMES_BROWSER_PATH` to point to the dedicated `chrome-headless-shell.exe` rather than the user's primary desktop browser.
+
+## Node.js ESM on Windows: `ERR_UNSUPPORTED_ESM_URL_SCHEME`
+
+**Symptom.** Dynamically importing a module via absolute path fails on Windows:
+```text
+TypeError [ERR_UNSUPPORTED_ESM_URL_SCHEME]: Only URLs with a scheme in: file, data, and node are supported. Received protocol 'g:'
+```
+
+**Cause.** Windows file paths start with drive letters (e.g. `G:\Workspace\...`), which Node's ESM loader treats as an invalid URL protocol (`g:`).
+
+**Fix.** Always convert absolute file paths to `file://` URLs using `pathToFileURL(absPath).href`, or use relative module specifiers:
+```javascript
+import { pathToFileURL } from "node:url";
+const { compileProject } = await import(pathToFileURL(compilerPath).href);
+```
+
+## HyperFrames Check: `Missing browser script motion-signature.browser.js`
+
+**Symptom.** Running `hyperframes check .` fails at runtime inspection:
+```text
+Runtime
+  ✗ check_runtime_failure: Missing browser script motion-signature.browser.js
+```
+
+**Cause.** The local HyperFrames CLI build (`packages/cli/dist/commands`) is missing browser-injected audit scripts because `build-copy.mjs` was skipped or timed out.
+
+**Fix.** Copy the browser scripts from `packages/cli/src/commands/` to `packages/cli/dist/commands/`:
+- `motion-signature.browser.js`
+- `layout-audit.browser.js`
+- `contrast-audit.browser.js`
+- `motion-sample.browser.js`
+
+## HyperFrames Check: WCAG AA 4.5:1 Text Contrast Rejection
+
+**Symptom.** `hyperframes check .` fails under the `Contrast` category with `need 4.5:1` error for secondary text or tags.
+
+**Cause.** Dark-theme palettes often use subdued grays (such as `#5d6878` or `#6b7787`) on near-black backgrounds (`#05060a`), which yield contrast ratios around 3.4:1 ~ 4.1:1, falling below WCAG AA minimum 4.5:1.
+
+**Fix.** Bump muted foreground tones to at least `#8391a3` in `core/generator/compiler.mjs`. This maintains dark-theme sophistication while passing 100% of HyperFrames automated contrast checks.
+
+## Cross-Sandbox Path Resolution: `ValueError: ... is not in the subpath of ...`
+
+**Symptom.** Running TTS or compiler scripts throws `ValueError` during `Path.relative_to(...)`.
+
+**Cause.** Code assumed paths were always located inside a single root directory. When migrating to multi-workspace sandboxes (`projects/<name>`), paths outside the assumed ancestor trigger Python `pathlib.Path.relative_to()` failure.
+
+**Fix.** Anchor relative calculations to the true repository root (`REPO_ROOT = Path(__file__).resolve().parent.parent.parent`), and wrap with fallback exception handling:
+```python
+try:
+    rel_path = target_file.relative_to(REPO_ROOT)
+except Exception:
+    rel_path = target_file
+```

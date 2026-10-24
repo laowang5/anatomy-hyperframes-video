@@ -4,8 +4,9 @@
 
 Do not decide shot lengths by feel. Write the narration, synthesize it, **measure it**, then build the timeline around the measured durations. A 25-word Chinese sentence at `--rate=+8%` runs about 11 seconds; you will not guess that.
 
-```
-node geo/tts.mjs        # → assets/voice/<id>.mp3 + a duration table
+```bash
+node bin/video.mjs voice --project <name> [--production]
+# Invokes core/tts/engine.py --project-dir projects/<name>
 ```
 
 ```

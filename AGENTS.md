@@ -68,83 +68,91 @@ Topics: `data-attributes`, `gsap`, `compositions`, `rendering`, `examples`, `tro
 https://hyperframes.heygen.com/llms.txt
 ```
 
-## Project Structure
+## Multi-Workspace Project Topology
 
-- `index.html` — main composition (root timeline)
-- `compositions/` — sub-compositions referenced via `data-composition-src`
-- `meta.json` — project metadata (id, name)
-- `transcript.json` — whisper word-level transcript (if generated)
+The workspace separates universal engine tools from project-specific video sandboxes:
 
-## Linting — ALWAYS RUN AFTER CHANGES
-
-After creating or editing any `.html` composition, **always** run the full check before considering the task complete:
-
-```bash
-npm run check
+```text
+anatomy-hyperframes-video/
+├── core/                                 # 🌟 Universal Engine
+│   ├── config.mjs                        # Dynamic Chrome path resolver & lock cleaner
+│   ├── tts/engine.py                     # Dual-track TTS & heteronym decoupling engine
+│   ├── generator/compiler.mjs            # Composition compiler (38px clean subtitles)
+│   └── styles/lib.mjs                    # Isometric shader library (matCss)
+├── bin/
+│   └── video.mjs                         # 🌟 Master CLI Orchestrator (Parameterized --project)
+└── projects/                             # 🌟 Isolated Project Sandboxes
+    ├── _template/                        # Minimal starter template for new videos
+    ├── mechanical-keyboard/              # Project 1: Mechanical Keyboard (105.6s)
+    └── anc-headphones/                   # Project 2: Active Noise Cancelling (15.6s)
 ```
 
-Fix all errors before presenting the result. Warnings should be reviewed before rendering.
-
-Then look at what you changed: `npx hyperframes snapshot --at <seconds>` (or `--range START,END`, `--composition <id>`) at the moments you edited, and read the frames before you reply. A passing check does not show how it looks.
-
-## Key Rules
-
-1. Every timed element needs `data-start` and a duration. `data-start` is what marks it as timed; `data-track-index` is an optional Studio display lane the render never reads
-2. Give timed visual elements `class="clip"`. The framework keys visibility off `data-start`, not the class, but the shared `.clip` CSS is what gives a scene its full-frame box, and `lint` warns without it
-3. Register one paused root timeline per composition on `window.__timelines`:
-   ```js
-   window.__timelines = window.__timelines || {};
-   window.__timelines["composition-id"] = gsap.timeline({ paused: true });
-   ```
-   Scene timelines manually added to this root must not be paused. A paused
-   child does not advance when the root is seeked. The runtime activates
-   registered composition siblings, not arbitrary nested scene timelines.
-4. A video with sound keeps it on the `<video>` (`data-has-audio="true"`, no `muted`). Use a separate `<audio>` for music, voiceover, replacement audio, J/L cuts, or audio detached in Studio. Silent footage and b-roll: `muted`.
-5. Sub-compositions use `data-composition-src="compositions/file.html"` to reference other HTML files
-6. Only deterministic logic — no `Date.now()`, no `Math.random()`, no network fetches
+Each sandbox inside `projects/<name>` is strictly self-contained:
+- `project.json` — metadata (resolution, dimensions, theme)
+- `script.json` — narration voice lines
+- `scenes.config.mjs` — scene metadata and part lists
+- `geo/` — Anatomy isometric geometry & assembly code
+- `assets/` — SVG figures (`assets/figures/`) & audio tracks (`assets/voice/`)
+- `compositions/` — generated sub-compositions (`compositions/<scene>.html`)
+- `index.html` — generated root composition timeline
+- `preview/` & `renders/` — snapshot and final video output
 
 ---
 
-## Anatomy × HyperFrames Explainer Pipeline Rules (Next Video Reference)
+## Master CLI Commands (`bin/video.mjs`)
 
-When building or updating isometric exploded-view technical explainer videos, **always follow this standardized pipeline**:
+Always drive the pipeline through the master orchestrator. Use `--project <name>` (defaults to `mechanical-keyboard`):
 
-### 1. Unified Agentic CLI (`bin/video.mjs`)
-Do not run fragmented manual scripts. Use the unified master CLI configured in `package.json`:
 ```bash
-# Full automated end-to-end build & render (Commercial MiMo TTS + Aligned Video)
-node bin/video.mjs render --production renders/my_video.mp4
+# 1. Full end-to-end build (voice -> figures -> scenes -> check)
+node bin/video.mjs build --project <name> [--production]
 
-# Granular workflow steps:
-node bin/video.mjs voice --production    # 1. Dual-track TTS synthesis & timestamp alignment
-node bin/video.mjs figures               # 2. Build Anatomy isometric SVG figures
-node bin/video.mjs scenes                # 3. Assemble compositions with Inline SVG & Subtitles
-node bin/video.mjs snapshot --at 1.0     # 4. Visual snapshot quality inspection
-node bin/video.mjs check                 # 5. HyperFrames linter & duration gate
+# 2. Granular sub-commands
+node bin/video.mjs voice --project <name> [--production]  # Dual-track TTS synthesis & timestamp extraction
+node bin/video.mjs figures --project <name>              # Build Anatomy isometric SVG figures
+node bin/video.mjs scenes --project <name>               # Compile HTML compositions & root index.html
+node bin/video.mjs check --project <name>                # Quality gate: Lint + Runtime + Motion + Contrast (WCAG AA)
+node bin/video.mjs snapshot --project <name> --at 1.0    # Capture visual validation frame
+node bin/video.mjs render --project <name> [--production] # Render final MP4
 ```
 
-### 2. Inline SVG Animation & Material Piercing
-- **Never use `<img src="*.svg">` for interactive/exploding figures**: `<img>` creates an isolated document tree that prevents GSAP from animating internal parts.
-- **Always use Inline SVG**: Inject the raw SVG directly into the scene `<template>` so parts (`#s-stem`, `#s-spring`, `#s-contact`) can be translated, scaled, and highlighted dynamically.
-- **Top-Level Material CSS (`matCss()`)**: Always lift the material stylesheet to the scene's top-level `<template><style>` to prevent material black-out or inheritance loss.
+---
 
-### 3. Dual-Track TTS & Heteronym Pronunciation Rule
+## Five Inviolable Production Standards
+
+### 1. Physical Sandbox Isolation
+- **Never mutate files across project boundaries.** Each video belongs in its own `projects/<name>` sandbox.
+- When running child processes, **always bind `cwd: projectDir`** to guarantee that HyperFrames resolves assets and caches strictly within the target sandbox.
+- Copy `projects/_template` to create new videos. Do not write exploratory code in the root directory.
+
+### 2. Inline SVG Animation & Material Piercing
+- **Never use `<img src="*.svg">` for exploding, compressing, or moving assemblies**: `<img>` creates an isolated document tree that prevents GSAP from animating internal parts.
+- **Inject raw SVG inline** into the scene `<template>` so GSAP can target internal components directly (`#s-stem`, `#s-spring`, `#s-contact`).
+- **Lift `matCss()`** to the top-level scene `<template><style>` to prevent material black-out or inheritance loss.
+
+### 3. Dual-Track TTS & Heteronym Phonetic Decoupling
 - **Dual-Track**:
   - `preview`: Edge-TTS (`zh-CN-YunxiNeural`) for instant, zero-cost drafting and millisecond-level `WordBoundary` timestamp extraction.
   - `production`: MiMo-v2.5-TTS (`茉莉` / `苏打`) for studio-quality 44.1kHz commercial audio, with timestamps elastically scaled (`mimoDur / edgeDur`).
-- **Phonetic Decoupling for Heteronyms**:
-  - Technical terms with multiple readings (e.g. "弹片" misread as weapon shrapnel `dàn piàn` instead of `tán piàn`) **MUST be decoupled**:
-  - Pass homophones (`谈片`) to the TTS engine so audio is 100% phonetically correct.
-  - Keep canonical text (`弹片 LEAF`) in all HTML labels, headlines, and subtitles.
+- **Phonetic Decoupling for Polyphonic Words**:
+  - When technical terms have multiple pronunciations (e.g., "弹片" misread as weapon shrapnel `dàn piàn` instead of mechanical leaf `tán piàn`), decouple audio text from display text:
+  - Send homophones (`谈片`) to the TTS engine so voiceover is 100% phonetically correct.
+  - Maintain canonical Chinese characters (`弹片 LEAF`) in all HTML labels, headlines, and subtitles.
 
-### 4. Modern Clean Subtitles Standard
-- **Eliminate Bottom Clutter**: Remove bottom progress bars (`.bar`), footer watermarks (`.foot`), and pagination indices (`.pg`) to allow clean breathing room.
-- **Typography & Positioning**:
-  - Dock: `position: absolute; bottom: 52px; left: 50%; transform: translateX(-50%); width: 100%;`
-  - Typography: Large **38px** (font-weight 600), cold-white (`#f8fafc`), borderless, pill-less.
-  - Shadow: Dual-layer deep shadow (`text-shadow: 0 3px 18px rgba(0,0,0,0.95), 0 1px 4px rgba(0,0,0,0.85)`).
-  - GSAP: Smooth `opacity: 0, y: 8` fade-in and `opacity: 0, y: -6` fade-out per spoken sentence beat.
+### 4. Modern Clean Subtitles Standard (38px Borderless)
+- **Eliminate Bottom Clutter**: Remove bottom progress bars (`.bar`), footer marks (`.foot`), and pagination indices (`.pg`) to provide cinematic breathing room.
+- **Dock Positioning**: `position: absolute; bottom: 52px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 1600px; display: flex; justify-content: center; pointer-events: none; z-index: 90;`
+- **Typography & Shadows**: Large **38px** font size, weight `600`, cold-white (`#f8fafc`), borderless, pill-less, enhanced with dual-layer dark drop shadows (`text-shadow: 0 3px 18px rgba(0,0,0,0.95), 0 1px 4px rgba(0,0,0,0.85)`).
+- **GSAP Sync**: Timed to spoken sentence start/end beats with subtle vertical easing (`opacity: 0, y: 8` -> `opacity: 1, y: 0` -> `opacity: 0, y: -6`).
 
-### 5. Windows Chrome Headless Stability
-- The CLI automatically kills orphaned Chrome processes and recursively purges `AppData/Local/Temp/puppeteer_dev_chrome_profile-*` before launching to prevent headless socket/profile deadlocks.
+### 5. Windows Chrome Headless Stability & WCAG AA Contrast
+- Dynamic Chrome path resolution: Automatically scans `~/.cache/hyperframes/chrome/chrome-headless-shell` to avoid hardcoding brittle version strings.
+- Pre-launch lock purging: Purges `AppData/Local/Temp/puppeteer_dev_chrome_profile-*` directories before every check, snapshot, and render to eliminate Windows process deadlocks.
 - The root scene element `#root` must carry `data-root="true"` to prevent zero-duration capture errors.
+- Text contrast must exceed WCAG AA 4.5:1 floor (use `#8391a3` or lighter on dark backgrounds) to ensure clean passes through HyperFrames checks.
+
+---
+
+## Git Safety & Commit Baseline
+- **Never push to GitHub automatically** (strictly adhere to user Rule 6).
+- All changes must be backed by local atomic commits and verified against golden master snapshots before task completion.
