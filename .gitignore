@@ -1,0 +1,16 @@
+# Dependency directories
+node_modules/
+.venv/
+__pycache__/
+
+# HyperFrames runtime & extraction caches
+.hyperframes/
+renders/*.mp4
+*.tmp
+*.tmp.*
+
+# OS & Editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

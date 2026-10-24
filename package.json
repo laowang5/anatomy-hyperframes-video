@@ -1,0 +1,13 @@
+{
+  "name": "kb-video",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node bin/video.mjs build",
+    "dev": "node bin/video.mjs preview",
+    "check": "node bin/video.mjs check",
+    "render": "node bin/video.mjs render",
+    "figures": "node bin/video.mjs figures",
+    "scenes": "node bin/video.mjs scenes"
+  }
+}

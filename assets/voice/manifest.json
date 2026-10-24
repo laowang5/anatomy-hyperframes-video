@@ -1,0 +1,56 @@
+[
+  {
+    "id": "01-hook",
+    "duration": 9.6,
+    "chars": 47,
+    "source": "mimo-v2.5-tts"
+  },
+  {
+    "id": "02-cap",
+    "duration": 11.68,
+    "chars": 60,
+    "source": "mimo-v2.5-tts"
+  },
+  {
+    "id": "03-switch",
+    "duration": 14.88,
+    "chars": 65,
+    "source": "mimo-v2.5-tts"
+  },
+  {
+    "id": "04-magnet",
+    "duration": 14.56,
+    "chars": 71,
+    "source": "mimo-v2.5-tts"
+  },
+  {
+    "id": "05-plate",
+    "duration": 8.96,
+    "chars": 45,
+    "source": "mimo-v2.5-tts"
+  },
+  {
+    "id": "06-pcb",
+    "duration": 9.92,
+    "chars": 49,
+    "source": "mimo-v2.5-tts"
+  },
+  {
+    "id": "07-foam",
+    "duration": 7.2,
+    "chars": 35,
+    "source": "mimo-v2.5-tts"
+  },
+  {
+    "id": "08-case",
+    "duration": 8.8,
+    "chars": 41,
+    "source": "mimo-v2.5-tts"
+  },
+  {
+    "id": "09-outro",
+    "duration": 10.56,
+    "chars": 50,
+    "source": "mimo-v2.5-tts"
+  }
+]
