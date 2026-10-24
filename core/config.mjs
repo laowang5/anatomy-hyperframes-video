@@ -1,4 +1,5 @@
 import { existsSync, readdirSync, rmSync } from "node:fs";
+import os from "node:os";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -12,7 +13,7 @@ export function resolveChromePath() {
     return process.env.HYPERFRAMES_BROWSER_PATH;
   }
 
-  const baseCache = "C:/Users/Administrator/.cache/hyperframes/chrome/chrome-headless-shell";
+  const baseCache = join(os.homedir(), ".cache", "hyperframes", "chrome", "chrome-headless-shell");
   if (existsSync(baseCache)) {
     try {
       const versions = readdirSync(baseCache);
@@ -27,7 +28,7 @@ export function resolveChromePath() {
 
 // 2. 清理 Temp 中 Puppeteer 的残留锁目录，防止 "browser is already running" 冲突
 export function cleanTempProfiles() {
-  const tmp = process.env.TEMP || "C:/Users/Administrator/AppData/Local/Temp";
+  const tmp = process.env.TEMP || os.tmpdir();
   try {
     const files = readdirSync(tmp);
     for (const f of files) {

@@ -60,6 +60,41 @@ function getWordTime(timings, sceneId, word, fallback) {
   return match ? match.start : fallback;
 }
 
+function compileHighlights(svgId, highlights, timings, sceneId) {
+  if (!highlights || !highlights.length) return "";
+  const lines = [];
+  for (const hl of highlights) {
+    const target = `#${svgId} ${hl.part}`;
+    const tAt = hl.at ? getWordTime(timings, sceneId, hl.at, hl.t || 0) : (hl.t || 0);
+    const tStart = Number((tAt + (hl.delay || 0)).toFixed(2));
+    if (hl.fx === "flash") {
+      const dur = hl.duration || 0.2;
+      lines.push(`tl.to("${target}", { stroke: "${hl.stroke || '#ff7a45'}", strokeWidth: ${hl.width || 1.8}, duration: ${dur} }, ${tStart})`);
+      if (hl.baseStroke) {
+        lines.push(`  .to("${target}", { stroke: "${hl.baseStroke}", strokeWidth: ${hl.baseWidth || 0.7}, duration: 0.4 }, ${(tStart + dur + 0.1).toFixed(2)});`);
+      }
+    } else if (hl.fx === "squash") {
+      lines.push(`tl.to("${target}", { scaleY: ${hl.scaleY || 0.9}, yoyo: true, repeat: ${hl.repeat ?? 1}, duration: ${hl.duration || 0.25}, transformOrigin: "${hl.origin || 'center center'}" }, ${tStart});`);
+    } else if (hl.fx === "press") {
+      lines.push(`tl.to("${target}", { y: "+=${hl.dy || 30}", duration: ${hl.duration || 0.32}, ease: "power2.in" }, ${tStart});`);
+    } else if (hl.fx === "pressSpring") {
+      lines.push(`tl.to("${target}", { scaleY: ${hl.scaleY || 0.78}, y: "+=${hl.dy || 12}", transformOrigin: "${hl.origin || 'center center'}", duration: ${hl.duration || 0.32}, ease: "power2.in" }, ${tStart});`);
+    } else if (hl.fx === "release") {
+      lines.push(`tl.to("${target}", { y: 0, duration: ${hl.duration || 0.45}, ease: "elastic.out(1, 0.4)" }, ${tStart});`);
+    } else if (hl.fx === "releaseSpring") {
+      lines.push(`tl.to("${target}", { scaleY: 1, y: 0, transformOrigin: "${hl.origin || 'center center'}", duration: ${hl.duration || 0.45}, ease: "elastic.out(1, 0.4)" }, ${tStart});`);
+    } else if (hl.fx === "color") {
+      const vars = {};
+      if (hl.stroke) vars.stroke = hl.stroke;
+      if (hl.width) vars.strokeWidth = hl.width;
+      if (hl.fill) vars.fill = hl.fill;
+      if (hl.duration) vars.duration = hl.duration;
+      lines.push(`tl.to("${target}", ${JSON.stringify(vars)}, ${tStart});`);
+    }
+  }
+  return lines.join("\n    ");
+}
+
 export async function compileProject(projectDir) {
   const dir = resolve(projectDir);
   const voiceDir = join(dir, "assets/voice");
@@ -73,6 +108,21 @@ export async function compileProject(projectDir) {
     throw new Error(`scenes.config.mjs not found in ${dir}`);
   }
   const { SCENES } = await import(pathToFileURL(configFile).href);
+
+  // 1.1 校验 script.json 与 scenes.config.mjs ID 是否对齐
+  const scriptFile = join(dir, "script.json");
+  if (!existsSync(scriptFile)) {
+    throw new Error(`script.json not found in ${dir}`);
+  }
+  const scriptData = JSON.parse(readFileSync(scriptFile, "utf8"));
+  const scriptIds = new Set(scriptData.map((s) => s.id));
+  for (const s of SCENES) {
+    if (!scriptIds.has(s.id)) {
+      throw new Error(
+        `[compileProject] Scene ID "${s.id}" in scenes.config.mjs is missing from script.json! Available IDs: ${[...scriptIds].join(", ")}`
+      );
+    }
+  }
 
   // 2. 加载时间戳元数据
   const timingFile = join(voiceDir, "timing.json");
@@ -119,34 +169,10 @@ export async function compileProject(projectDir) {
         `<svg id="${s.key}-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 1080" class="clip fig" data-start="0" data-duration="${d}" style="width:100%;height:100%;object-fit:contain;">`
       );
 
-      const tTop = getWordTime(timings, s.id, "上", 2.2);
-      const tStem = getWordTime(timings, s.id, "轴心", 2.9);
-      const tSpring = getWordTime(timings, s.id, "弹簧", 3.8);
-      const tLeaf = getWordTime(timings, s.id, "弹片", 4.8);
-      const tBottom = getWordTime(timings, s.id, "下", 6.2);
-      const tPress = getWordTime(timings, s.id, "按下", 7.6);
-      const tContact = getWordTime(timings, s.id, "接触", 9.4);
-      const tClose = getWordTime(timings, s.id, "闭合", 10.2);
-
+      const customFx = compileHighlights(`${s.key}-svg`, s.highlights, timings, s.id);
       figureAnim = `
     tl.fromTo("#${s.key}-svg",{opacity:0,scale:.93,y:26},{opacity:1,scale:1,y:0,duration:1.05,ease:"power3.out"},0);
-    tl.to("#${s.key}-svg #s-top .iso-edge", { stroke: "#ff7a45", strokeWidth: 1.6, duration: 0.2 }, ${tTop.toFixed(2)})
-      .to("#${s.key}-svg #s-top .iso-edge", { stroke: "#5d6878", strokeWidth: 0.7, duration: 0.4 }, ${(tTop + 0.3).toFixed(2)});
-    tl.to("#${s.key}-svg #s-stem .iso-edge", { stroke: "#ff7a45", strokeWidth: 1.8, duration: 0.2 }, ${tStem.toFixed(2)})
-      .to("#${s.key}-svg #s-stem .iso-edge", { stroke: "#7b8595", strokeWidth: 0.7, duration: 0.4 }, ${(tStem + 0.3).toFixed(2)});
-    tl.to("#${s.key}-svg #s-spring", { scaleY: 0.9, yoyo: true, repeat: 1, duration: 0.25, transformOrigin: "620px 680px" }, ${tSpring.toFixed(2)});
-    tl.to("#${s.key}-svg #s-contact .iso-edge", { stroke: "#ff7a45", strokeWidth: 1.8, duration: 0.2 }, ${tLeaf.toFixed(2)})
-      .to("#${s.key}-svg #s-contact .iso-edge", { stroke: "#e8a066", strokeWidth: 0.7, duration: 0.4 }, ${(tLeaf + 0.3).toFixed(2)});
-    tl.to("#${s.key}-svg #s-bottom .iso-edge", { stroke: "#ff7a45", strokeWidth: 1.6, duration: 0.2 }, ${tBottom.toFixed(2)})
-      .to("#${s.key}-svg #s-bottom .iso-edge", { stroke: "#7b8595", strokeWidth: 0.7, duration: 0.4 }, ${(tBottom + 0.3).toFixed(2)});
-    tl.to("#${s.key}-svg #s-stem", { y: "+=30", duration: 0.32, ease: "power2.in" }, ${tPress.toFixed(2)});
-    tl.to("#${s.key}-svg #s-spring", { scaleY: 0.78, y: "+=12", transformOrigin: "620px 680px", duration: 0.32, ease: "power2.in" }, ${tPress.toFixed(2)});
-    tl.to("#${s.key}-svg #s-contact .iso-edge", { stroke: "#ff7a45", strokeWidth: 2.2, duration: 0.15 }, ${tContact.toFixed(2)});
-    tl.to("#${s.key}-svg .tag", { fill: "#ff7a45", duration: 0.15 }, ${tContact.toFixed(2)});
-    tl.to("#${s.key}-svg #s-stem", { y: 0, duration: 0.45, ease: "elastic.out(1, 0.4)" }, ${(tClose + 0.5).toFixed(2)});
-    tl.to("#${s.key}-svg #s-spring", { scaleY: 1, y: 0, duration: 0.45, ease: "elastic.out(1, 0.4)" }, ${(tClose + 0.5).toFixed(2)});
-    tl.to("#${s.key}-svg #s-contact .iso-edge", { stroke: "#e8a066", strokeWidth: 0.7, duration: 0.3 }, ${(tClose + 0.7).toFixed(2)});
-    tl.to("#${s.key}-svg .tag", { fill: "#5ad2c0", duration: 0.3 }, ${(tClose + 0.7).toFixed(2)});
+    ${customFx}
     tl.fromTo("#${s.key}-fig", { rotation: -0.6 }, { rotation: 0.4, duration: ${d.toFixed(2)}, ease: "sine.inOut" }, 0);
     `;
     } else {

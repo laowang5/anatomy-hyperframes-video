@@ -56,12 +56,12 @@ switch (cmd) {
   }
   case "figures": {
     log("GEO", "Building Anatomy SVG figures...");
-    const buildScript = join(PROJ_DIR, "geo/build-figures.mjs");
-    if (existsSync(buildScript)) {
-      execFileSync("node", [buildScript], { cwd: PROJ_DIR, stdio: "inherit" });
-    } else {
-      execFileSync("node", ["geo/build-figures.mjs"], { cwd: REPO_ROOT, stdio: "inherit" });
+    const buildScript = join(PROJ_DIR, "geo", "build-figures.mjs");
+    if (!existsSync(buildScript)) {
+      log("GEO", `No geo/build-figures.mjs found in project [${projName}], skipping vector build.`);
+      break;
     }
+    execFileSync("node", [buildScript], { cwd: PROJ_DIR, stdio: "inherit" });
     break;
   }
   case "scenes": {
@@ -148,15 +148,31 @@ switch (cmd) {
     cleanTempProfiles();
     log("Step 4/4", "Validating compositions with HyperFrames check");
     const checkRes = spawnSync("node", [HF_CLI, "check", ".", "--json"], { cwd: PROJ_DIR, env: process.env, encoding: "utf8" });
+    if (checkRes.status !== 0) {
+      console.error(checkRes.stdout || checkRes.stderr);
+      console.error(`[video-cli] Quality gate check failed with exit code ${checkRes.status}`);
+      process.exit(1);
+    }
+    let parsed = null;
     try {
-      const parsed = JSON.parse(checkRes.stdout.trim().split("\n").pop());
-      if (parsed.lint && parsed.lint.errorCount > 0) {
-        console.error("Lint errors detected:", parsed.lint.findings);
+      const lines = checkRes.stdout.trim().split("\n");
+      parsed = JSON.parse(lines[lines.length - 1]);
+    } catch (e) {
+      console.error("[video-cli] Failed to parse JSON output from check:\n", checkRes.stdout);
+      process.exit(1);
+    }
+    if (parsed) {
+      const errors = [];
+      if (parsed.lint && parsed.lint.errorCount > 0) errors.push(`Lint: ${parsed.lint.errorCount} error(s)`);
+      if (parsed.runtime && parsed.runtime.errorCount > 0) errors.push(`Runtime: ${parsed.runtime.errorCount} error(s)`);
+      if (parsed.contrast && parsed.contrast.errorCount > 0) errors.push(`Contrast: ${parsed.contrast.errorCount} error(s)`);
+      if (parsed.motion && parsed.motion.errorCount > 0) errors.push(`Motion: ${parsed.motion.errorCount} error(s)`);
+      if (parsed.layout && parsed.layout.errorCount > 0) errors.push(`Layout: ${parsed.layout.errorCount} error(s)`);
+      if (errors.length > 0) {
+        console.error(`[video-cli] Quality gate rejected project [${projName}]:`, errors.join(", "));
         process.exit(1);
       }
-      log("Step 4/4", "Quality gate passed! Lint: 0 errors.");
-    } catch {
-      log("Step 4/4", "Quality check completed.");
+      log("Step 4/4", "Quality gate passed! 0 errors in lint, runtime, contrast & motion.");
     }
 
     log("SUCCESS", `Project [${projName}] build complete! Run \`node bin/video.mjs render --project ${projName}\` to export MP4.`);

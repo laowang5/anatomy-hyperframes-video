@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-resolution="landscape">
+  <head>
+    <meta charset="utf-8" />
+    <title>Demo Project — Anatomy × HyperFrames</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      html,body{margin:0;padding:0;background:#05060a;width:1920px;height:1080px;overflow:hidden}
+      .scene{position:absolute;inset:0;width:100%;height:100%}
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-root="true"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="3.93"
+      data-width="1920"
+      data-height="1080"
+    >
+      <div
+        id="k01-intro"
+        class="scene"
+        data-composition-id="k01-intro"
+        data-composition-src="compositions/01-intro.html"
+        data-start="0"
+        data-duration="3.93"
+        data-track-index="1"
+        data-track-kind="graphics"
+      ></div>
+    <audio
+      id="vo-01-intro"
+      src="assets/voice/01-intro.mp3"
+      data-start="0"
+      data-duration="2.88"
+      data-track-index="2"
+      data-volume="1"
+    ></audio>
+    </div>
+    <script>
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = gsap.timeline({ paused: true });
+    </script>
+  </body>
+</html>

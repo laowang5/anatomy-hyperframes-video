@@ -279,7 +279,7 @@ async def main():
     parser.add_argument("--force", action="store_true", help="强制重新合成，忽略已存在的文件缓存")
     args = parser.parse_args()
 
-    proj_dir = Path(args.project_dir).resolve() if args.project_dir else ROOT
+    proj_dir = Path(args.project_dir).resolve() if args.project_dir else REPO_ROOT
     script_file = proj_dir / "script.json"
     if not script_file.exists():
         script_file = proj_dir / "geo" / "script.json"
@@ -295,11 +295,16 @@ async def main():
     if mode == "auto":
         mode = "production" if mimo_key else "preview"
 
+    if mode == "production" and not mimo_key:
+        print(f"\n❌ [TTS 错误]: 指定了 --mode production，但系统未检测到 MIMO_API_KEY 环境变量！", file=sys.stderr)
+        print(f"   生产模式要求严格产出商业高保真配音；如需本地预览开发请指定 --mode preview 或 --mode auto。\n", file=sys.stderr)
+        sys.exit(1)
+
     print(f"\n{'━'*60}")
     print(f"  🎙️ 双轨音频对齐引擎 (Dual-Track TTS Engine)")
     print(f"  🔧 执行模式: {'⚡ [Preview] Edge-TTS 快速预览' if mode == 'preview' else '🌟 [Production] MiMo-v2.5-TTS 高保真商业渲染'}")
     if mode == "production":
-        print(f"  🔑 MiMo 授权: {'已就绪 (' + mimo_key[:6] + '...' + mimo_key[-4:] + ')' if mimo_key else '❌ 未找到 MIMO_API_KEY，将优雅降级'}")
+        print(f"  🔑 MiMo 授权: 已就绪 ({mimo_key[:6]}...{mimo_key[-4:]})")
     print(f"{'━'*60}\n")
 
     timing_data = {}

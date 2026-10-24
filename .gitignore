@@ -5,9 +5,14 @@ __pycache__/
 
 # HyperFrames runtime & extraction caches
 .hyperframes/
-renders/*.mp4
 *.tmp
 *.tmp.*
+
+# Generated Media Binaries (Regenerable via CLI)
+projects/*/renders/*.mp4
+projects/*/assets/voice/*.mp3
+projects/*/preview/
+renders/*.mp4
 
 # OS & Editor files
 .DS_Store
