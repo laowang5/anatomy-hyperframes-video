@@ -1,5 +1,4 @@
-import * as K from "../../anatomy/kit/iso-kit.mjs";
-import { prism, tube, ring, solid, frustum, matCss, leader, tag, svgDoc, INK } from "./lib.mjs";
+import { K, prism, tube, ring, solid, frustum, matCss, leader, tag, svgDoc, INK } from "./lib.mjs";
 
 export const U = 24;
 export const GAP = 1.9;

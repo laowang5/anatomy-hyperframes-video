@@ -1,7 +1,10 @@
 import { mkdirSync, writeFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { FIGS } from "./figures.mjs";
 
-const dir = "G:/Workspace/kb-video/assets/figures";
+const __dirname = fileURLToPath(new URL(".", import.meta.url));
+const dir = resolve(__dirname, "../assets/figures");
 mkdirSync(dir, { recursive: true });
 
 const only = process.argv.slice(2);

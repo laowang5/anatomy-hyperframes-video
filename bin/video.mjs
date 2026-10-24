@@ -1,36 +1,27 @@
 #!/usr/bin/env node
 
 import { execFileSync, spawnSync } from "node:child_process";
-import { existsSync, readdirSync, rmSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import {
+  REPO_ROOT,
+  resolveChromePath,
+  cleanTempProfiles,
+  resolveHyperFramesCli,
+  resolveProjectDir,
+} from "../core/config.mjs";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
-const ROOT = resolve(__dirname, "..");
 
-// 1. 自动配置无头 Chrome 路径（避开系统普通 Chrome 进程冲突）
-const HEADLESS_SHELL = "C:/Users/Administrator/.cache/hyperframes/chrome/chrome-headless-shell/win64-131.0.6778.85/chrome-headless-shell-win64/chrome-headless-shell.exe";
-if (existsSync(HEADLESS_SHELL)) {
-  process.env.HYPERFRAMES_BROWSER_PATH = HEADLESS_SHELL;
-  process.env.PRODUCER_HEADLESS_SHELL_PATH = HEADLESS_SHELL;
+// 1. 自动配置动态检测的无头 Chrome 路径
+const chromePath = resolveChromePath();
+if (chromePath) {
+  process.env.HYPERFRAMES_BROWSER_PATH = chromePath;
+  process.env.PRODUCER_HEADLESS_SHELL_PATH = chromePath;
 }
 
-// 2. 清理 Temp 中 Puppeteer 的残留锁目录，防止 "browser is already running"
-function cleanTempProfiles() {
-  const tmp = process.env.TEMP || "C:/Users/Administrator/AppData/Local/Temp";
-  try {
-    const files = readdirSync(tmp);
-    for (const f of files) {
-      if (f.startsWith("puppeteer_dev_chrome_profile-")) {
-        try {
-          rmSync(join(tmp, f), { recursive: true, force: true });
-        } catch {}
-      }
-    }
-  } catch {}
-}
-
-const HF_CLI = resolve(ROOT, "../hyperframes/packages/cli/bin/hyperframes.mjs");
+const HF_CLI = resolveHyperFramesCli();
 
 function log(step, msg) {
   console.log(`\x1b[36m[video-cli]\x1b[0m \x1b[1m${step}\x1b[0m: ${msg}`);
@@ -38,44 +29,69 @@ function log(step, msg) {
 
 const args = process.argv.slice(2);
 const cmd = args.find((a) => !a.startsWith("-")) || "build";
-const mode = args.includes("--production") || args.includes("-p") ? "production" : "preview";
+const mode = args.includes("--production") ? "production" : "preview";
+
+// 2. 解析项目沙箱名称（支持 --project <name>，默认为 mechanical-keyboard）
+const projIdx = args.findIndex((a) => a === "--project" || a === "-P");
+const projName = projIdx !== -1 && args[projIdx + 1] ? args[projIdx + 1] : "mechanical-keyboard";
+
+// 获取沙箱路径，若不存在则回退至旧版根目录
+let PROJ_DIR;
+try {
+  PROJ_DIR = resolveProjectDir(projName);
+} catch {
+  PROJ_DIR = REPO_ROOT;
+}
+
+log("WORKSPACE", `Active project: \x1b[32m${projName}\x1b[0m (Path: ${PROJ_DIR})`);
 
 switch (cmd) {
   case "voice": {
     log("TTS", `Synthesizing voice tracks (Mode: ${mode.toUpperCase()})...`);
-    execFileSync("python", ["geo/tts-engine.py", "--mode", mode], { cwd: ROOT, stdio: "inherit" });
+    execFileSync("python", ["core/tts/engine.py", "--project-dir", PROJ_DIR, "--mode", mode], {
+      cwd: REPO_ROOT,
+      stdio: "inherit",
+    });
     break;
   }
   case "figures": {
     log("GEO", "Building Anatomy SVG figures...");
-    execFileSync("node", ["geo/build-figures.mjs"], { cwd: ROOT, stdio: "inherit" });
+    const buildScript = join(PROJ_DIR, "geo/build-figures.mjs");
+    if (existsSync(buildScript)) {
+      execFileSync("node", [buildScript], { cwd: PROJ_DIR, stdio: "inherit" });
+    } else {
+      execFileSync("node", ["geo/build-figures.mjs"], { cwd: REPO_ROOT, stdio: "inherit" });
+    }
     break;
   }
   case "scenes": {
-    log("SCENES", "Generating composition HTML files & root index.html...");
-    execFileSync("node", ["geo/gen-scenes.mjs"], { cwd: ROOT, stdio: "inherit" });
+    log("SCENES", "Compiling scenes HTML & root index.html...");
+    const compilerPath = resolve(REPO_ROOT, "core/generator/compiler.mjs");
+    const { compileProject } = await import(pathToFileURL(compilerPath).href);
+    const res = await compileProject(PROJ_DIR);
+    log("SCENES", `Compilation successful: ${res.scenesCount} scenes, total ${res.totalDuration}s`);
     break;
   }
   case "check": {
     cleanTempProfiles();
     log("CHECK", "Running HyperFrames lint & quality gate...");
-    execFileSync("node", [HF_CLI, "check", "."], { cwd: ROOT, stdio: "inherit", env: process.env });
+    execFileSync("node", [HF_CLI, "check", "."], { cwd: PROJ_DIR, stdio: "inherit", env: process.env });
     break;
   }
   case "preview": {
     log("PREVIEW", "Starting HyperFrames preview server...");
-    execFileSync("node", [HF_CLI, "preview", "--background"], { cwd: ROOT, stdio: "inherit", env: process.env });
+    execFileSync("node", [HF_CLI, "preview", "--background"], { cwd: PROJ_DIR, stdio: "inherit", env: process.env });
     break;
   }
   case "snapshot": {
     cleanTempProfiles();
     const atIdx = args.indexOf("--at");
-    const at = atIdx !== -1 ? args[atIdx + 1] : "31.38";
+    const at = atIdx !== -1 ? args[atIdx + 1] : "1.0";
     const oIdx = args.indexOf("-o");
-    const out = oIdx !== -1 ? args[oIdx + 1] : "preview/snap_switch.png";
+    const out = oIdx !== -1 ? args[oIdx + 1] : "preview/snap.png";
     log("SNAPSHOT", `Capturing frame at ${at}s to ${out}...`);
     execFileSync("node", [HF_CLI, "snapshot", "--at", at, "-o", out], {
-      cwd: ROOT,
+      cwd: PROJ_DIR,
       stdio: "inherit",
       env: process.env,
     });
@@ -83,55 +99,69 @@ switch (cmd) {
   }
   case "render": {
     cleanTempProfiles();
-    // 渲染前若指定 --production 则自动保证使用 MiMo 高品质配音
     if (mode === "production") {
       log("TTS", "Ensuring MiMo-v2.5-TTS production audio is active...");
-      execFileSync("python", ["geo/tts-engine.py", "--mode", "production"], { cwd: ROOT, stdio: "inherit" });
-      execFileSync("node", ["geo/gen-scenes.mjs"], { cwd: ROOT, stdio: "inherit" });
+      execFileSync("python", ["core/tts/engine.py", "--project-dir", PROJ_DIR, "--mode", "production"], {
+        cwd: REPO_ROOT,
+        stdio: "inherit",
+      });
+      const compilerPath = resolve(REPO_ROOT, "core/generator/compiler.mjs");
+      const { compileProject } = await import(pathToFileURL(compilerPath).href);
+      await compileProject(PROJ_DIR);
     }
-    log("RENDER", "Rendering video to renders/out.mp4 (fps: 30)...");
-    const out = args.find((a) => a.endsWith(".mp4")) || "renders/out.mp4";
+    const outIdx = args.findIndex((a) => a.endsWith(".mp4"));
+    const out = outIdx !== -1 ? args[outIdx] : "renders/out.mp4";
+    log("RENDER", `Rendering video to ${out} (fps: 30)...`);
     execFileSync("node", [HF_CLI, "render", ".", "-o", out, "-f", "30", "-w", "1", "-q", "looks"], {
-      cwd: ROOT,
+      cwd: PROJ_DIR,
       stdio: "inherit",
       env: process.env,
     });
     break;
   }
   case "build": {
-    log("BUILD", `Executing end-to-end video pipeline (Mode: ${mode.toUpperCase()})...`);
+    log("BUILD", `Executing end-to-end pipeline (Project: ${projName}, Mode: ${mode.toUpperCase()})...`);
     // 步骤 1: 运行双轨 TTS 引擎
-    log("Step 1/5", `Synthesizing audio & extracting word timestamps (${mode})`);
-    execFileSync("python", ["geo/tts-engine.py", "--mode", mode], { cwd: ROOT, stdio: "inherit" });
+    log("Step 1/4", `Synthesizing audio & extracting word timestamps (${mode})`);
+    execFileSync("python", ["core/tts/engine.py", "--project-dir", PROJ_DIR, "--mode", mode], {
+      cwd: REPO_ROOT,
+      stdio: "inherit",
+    });
 
     // 步骤 2: 几何构件构建
-    log("Step 2/5", "Building Anatomy SVG figures");
-    execFileSync("node", ["geo/build-figures.mjs"], { cwd: ROOT, stdio: "inherit" });
+    log("Step 2/4", "Building Anatomy SVG figures");
+    const buildScript = join(PROJ_DIR, "geo/build-figures.mjs");
+    if (existsSync(buildScript)) {
+      execFileSync("node", [buildScript], { cwd: PROJ_DIR, stdio: "inherit" });
+    }
 
     // 步骤 3: 拼装分镜与 Inline SVG
-    log("Step 3/5", "Generating compositions with Inline SVG & precision timestamps");
-    execFileSync("node", ["geo/gen-scenes.mjs"], { cwd: ROOT, stdio: "inherit" });
+    log("Step 3/4", "Generating compositions with Inline SVG & precision timestamps");
+    const compilerPath = resolve(REPO_ROOT, "core/generator/compiler.mjs");
+    const { compileProject } = await import(pathToFileURL(compilerPath).href);
+    const res = await compileProject(PROJ_DIR);
+    log("Step 3/4", `Generated ${res.scenesCount} scenes (${res.totalDuration}s)`);
 
     // 步骤 4: 质量门禁检查
     cleanTempProfiles();
-    log("Step 4/5", "Validating compositions with HyperFrames check");
-    const checkRes = spawnSync("node", [HF_CLI, "check", ".", "--json"], { cwd: ROOT, env: process.env, encoding: "utf8" });
+    log("Step 4/4", "Validating compositions with HyperFrames check");
+    const checkRes = spawnSync("node", [HF_CLI, "check", ".", "--json"], { cwd: PROJ_DIR, env: process.env, encoding: "utf8" });
     try {
-      const res = JSON.parse(checkRes.stdout.trim().split("\n").pop());
-      if (res.lint && res.lint.errorCount > 0) {
-        console.error("Lint errors detected:", res.lint.findings);
+      const parsed = JSON.parse(checkRes.stdout.trim().split("\n").pop());
+      if (parsed.lint && parsed.lint.errorCount > 0) {
+        console.error("Lint errors detected:", parsed.lint.findings);
         process.exit(1);
       }
-      log("Step 4/5", "Quality gate passed! Lint: 0 errors.");
+      log("Step 4/4", "Quality gate passed! Lint: 0 errors.");
     } catch {
-      log("Step 4/5", "Quality check completed.");
+      log("Step 4/4", "Quality check completed.");
     }
 
-    log("SUCCESS", `Pipeline build complete! Run \`node bin/video.mjs render ${mode === "production" ? "--production" : ""}\` to export MP4.`);
+    log("SUCCESS", `Project [${projName}] build complete! Run \`node bin/video.mjs render --project ${projName}\` to export MP4.`);
     break;
   }
   default: {
-    console.log(`Usage: node bin/video.mjs [build|voice|figures|scenes|check|preview|render] [--production]`);
+    console.log(`Usage: node bin/video.mjs [build|voice|figures|scenes|check|preview|snapshot|render] [--project <name>] [--production]`);
     break;
   }
 }

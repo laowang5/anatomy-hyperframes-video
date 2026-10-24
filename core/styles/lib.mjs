@@ -1,4 +1,5 @@
-import * as K from "../../anatomy/kit/iso-kit.mjs";
+import * as K from "../../../anatomy/kit/iso-kit.mjs";
+export { K };
 
 export const area = (pts) => {
   let s = 0;

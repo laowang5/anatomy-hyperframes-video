@@ -17,9 +17,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SCRIPT_PATH = ROOT / "geo" / "script.json"
-VOICE_DIR = ROOT / "assets" / "voice"
-TIMING_PATH = VOICE_DIR / "timing.json"
-MANIFEST_PATH = VOICE_DIR / "manifest.json"
+voice_dir = ROOT / "assets" / "voice"
+timing_file = voice_dir / "timing.json"
+manifest_file = voice_dir / "manifest.json"
 
 # ── 中文多音字与机械键盘专有术语发音纠偏表（音画解耦：画面显示规范字，语音采用明确单音字）──
 PRONUNCIATION_OVERRIDES = {
@@ -279,11 +279,20 @@ async def main():
     parser = argparse.ArgumentParser(description="Dual-Track TTS Engine (Edge-TTS & MiMo-TTS)")
     parser.add_argument("--mode", choices=["preview", "production", "auto"], default="preview",
                         help="TTS模式: preview(Edge-TTS词级对齐), production(MiMo最终渲染), auto(有Key走MiMo无Key走Edge)")
+    parser.add_argument("--project-dir", default=None, help="目标项目沙箱路径")
     parser.add_argument("--force", action="store_true", help="强制重新合成，忽略已存在的文件缓存")
     args = parser.parse_args()
 
-    VOICE_DIR.mkdir(parents=True, exist_ok=True)
-    scenes = json.loads(SCRIPT_PATH.read_text(encoding="utf-8"))
+    proj_dir = Path(args.project_dir).resolve() if args.project_dir else ROOT
+    script_file = proj_dir / "script.json"
+    if not script_file.exists():
+        script_file = proj_dir / "geo" / "script.json"
+    voice_dir = proj_dir / "assets" / "voice"
+    timing_file = voice_dir / "timing.json"
+    manifest_file = voice_dir / "manifest.json"
+
+    voice_dir.mkdir(parents=True, exist_ok=True)
+    scenes = json.loads(script_file.read_text(encoding="utf-8"))
 
     mimo_key = resolve_mimo_key()
     mode = args.mode
@@ -307,12 +316,12 @@ async def main():
         phonetic_text = to_phonetic_text(text)
         edge_voice = s.get("voice", "zh-CN-YunxiNeural")
         
-        target_mp3 = VOICE_DIR / f"{sid}.mp3"
-        preview_mp3 = VOICE_DIR / f"{sid}.preview.mp3"
-        mimo_mp3 = VOICE_DIR / f"{sid}.mimo.mp3"
+        target_mp3 = voice_dir / f"{sid}.mp3"
+        preview_mp3 = voice_dir / f"{sid}.preview.mp3"
+        mimo_mp3 = voice_dir / f"{sid}.mimo.mp3"
 
         # 1. 始终保证具备 Edge-TTS 基础音频与词级时间戳基准
-        words_cache = VOICE_DIR / f"{sid}.words.json"
+        words_cache = voice_dir / f"{sid}.words.json"
         words = []
         if words_cache.exists() and not args.force:
             try:
@@ -377,14 +386,14 @@ async def main():
         })
 
     # 保存元数据与词级时间戳表
-    TIMING_PATH.write_text(json.dumps(timing_data, indent=2, ensure_ascii=False), encoding="utf-8")
-    MANIFEST_PATH.write_text(json.dumps(manifest_data, indent=2, ensure_ascii=False), encoding="utf-8")
+    timing_file.write_text(json.dumps(timing_data, indent=2, ensure_ascii=False), encoding="utf-8")
+    manifest_file.write_text(json.dumps(manifest_data, indent=2, ensure_ascii=False), encoding="utf-8")
 
     print(f"\n{'━'*60}")
     print(f"  ✅ 音频全量生成完毕！")
     print(f"  📊 总场景数: {len(scenes)} | 总音频时长: {total_duration:.2f}s")
-    print(f"  📄 词级时间戳已导出: {TIMING_PATH.relative_to(ROOT)}")
-    print(f"  📄 音频清单已更新: {MANIFEST_PATH.relative_to(ROOT)}")
+    print(f"  📄 词级时间戳已导出: {timing_file.relative_to(ROOT)}")
+    print(f"  📄 音频清单已更新: {manifest_file.relative_to(ROOT)}")
     print(f"{'━'*60}\n")
 
 if __name__ == "__main__":

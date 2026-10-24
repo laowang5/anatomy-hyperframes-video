@@ -1,5 +1,4 @@
-import * as K from "../../anatomy/kit/iso-kit.mjs";
-import { prism, tube, solid, frustum, matCss, svgDoc, leader, tag, INK } from "./lib.mjs";
+import { K, prism, tube, solid, frustum, matCss, svgDoc, leader, tag, INK } from "./lib.mjs";
 import { U, GAP, keys, keycap, switchSvg, caseSvg, foamSvg, pcbSvg, plateSvg, CASE_W, CASE_D, Z, LAYERS, STEP } from "./keyboard.mjs";
 
 export const FW = 1240;

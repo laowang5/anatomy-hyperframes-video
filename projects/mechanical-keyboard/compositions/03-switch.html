@@ -1379,58 +1379,24 @@
   <script>
     const tl = gsap.timeline({ paused: true });
     
-    // --- 1. 机械零件空间装配进场 (0.2s - 2.0s) ---
-    // 下盖从下方沉稳升起就位
-    tl.fromTo("#k03-switch-svg #s-bottom", { opacity: 0, y: 70 }, { opacity: 1, y: 0, duration: 0.7, ease: "power2.out" }, 0.2);
-    // 铜弹片滑入固定槽位
-    tl.fromTo("#k03-switch-svg #s-contact", { opacity: 0, y: -40, x: -15 }, { opacity: 1, y: 0, x: 0, duration: 0.6, ease: "power2.out" }, 0.45);
-    // 弹簧落位，带有微弱阻尼弹性形变
-    tl.fromTo("#k03-switch-svg #s-spring", { opacity: 0, scaleY: 0.3, y: -50, transformOrigin: "620px 680px" }, { opacity: 1, scaleY: 1, y: 0, duration: 0.75, ease: "elastic.out(1, 0.5)" }, 0.7);
-    // 轴心对准十字导柱下落
-    tl.fromTo("#k03-switch-svg #s-stem", { opacity: 0, y: -80 }, { opacity: 1, y: 0, duration: 0.65, ease: "power3.out" }, 1.0);
-    // 上盖从天而降，扣合就位
-    tl.fromTo("#k03-switch-svg #s-top", { opacity: 0, y: -100 }, { opacity: 1, y: 0, duration: 0.7, ease: "power2.out" }, 1.25);
-
-    // 标注引线在装配完成后依次展开
-    tl.fromTo("#k03-switch-svg .lbl", { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.45, stagger: 0.1, ease: "power2.out" }, 1.5);
-    tl.fromTo("#k03-switch-svg .tag", { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.5, ease: "power2.out" }, 1.9);
-
-    // --- 2. 词级时间戳精准语义高亮 (精准响应主播口播节奏) ---
-    // 念及 "上盖": 2.433s
+    tl.fromTo("#k03-switch-svg",{opacity:0,scale:.93,y:26},{opacity:1,scale:1,y:0,duration:1.05,ease:"power3.out"},0);
     tl.to("#k03-switch-svg #s-top .iso-edge", { stroke: "#ff7a45", strokeWidth: 1.6, duration: 0.2 }, 2.43)
-      .to("#k03-switch-svg #s-top .iso-edge", { stroke: "#a3aebe", strokeWidth: 0.7, duration: 0.4 }, 2.73);
-
-    // 念及 "轴心": 3.266s
-    tl.to("#k03-switch-svg #s-stem .iso-edge", { stroke: "#ff7a45", strokeWidth: 1.6, duration: 0.2 }, 3.27)
-      .to("#k03-switch-svg #s-stem .iso-edge", { stroke: "#ffffff", strokeWidth: 0.7, duration: 0.4 }, 3.57);
-
-    // 念及 "弹簧": 4.099s
+      .to("#k03-switch-svg #s-top .iso-edge", { stroke: "#5d6878", strokeWidth: 0.7, duration: 0.4 }, 2.73);
+    tl.to("#k03-switch-svg #s-stem .iso-edge", { stroke: "#ff7a45", strokeWidth: 1.8, duration: 0.2 }, 3.27)
+      .to("#k03-switch-svg #s-stem .iso-edge", { stroke: "#7b8595", strokeWidth: 0.7, duration: 0.4 }, 3.57);
     tl.to("#k03-switch-svg #s-spring", { scaleY: 0.9, yoyo: true, repeat: 1, duration: 0.25, transformOrigin: "620px 680px" }, 4.10);
-
-    // 念及 "金属弹片": 5.687s
     tl.to("#k03-switch-svg #s-contact .iso-edge", { stroke: "#ff7a45", strokeWidth: 1.8, duration: 0.2 }, 5.69)
       .to("#k03-switch-svg #s-contact .iso-edge", { stroke: "#e8a066", strokeWidth: 0.7, duration: 0.4 }, 5.99);
-
-    // 念及 "下盖": 1.104s
     tl.to("#k03-switch-svg #s-bottom .iso-edge", { stroke: "#ff7a45", strokeWidth: 1.6, duration: 0.2 }, 1.10)
       .to("#k03-switch-svg #s-bottom .iso-edge", { stroke: "#7b8595", strokeWidth: 0.7, duration: 0.4 }, 1.40);
-
-    // --- 3. 真实动作演示：在说出"按下时"精确触发键程动作 (7.6s - 12.186s) ---
-    // 轴心下沉 30px，弹簧被真实压缩
     tl.to("#k03-switch-svg #s-stem", { y: "+=30", duration: 0.32, ease: "power2.in" }, 7.60);
     tl.to("#k03-switch-svg #s-spring", { scaleY: 0.78, y: "+=12", transformOrigin: "620px 680px", duration: 0.32, ease: "power2.in" }, 7.60);
-
-    // 在说出"接触 / 电路闭合"瞬间 (11.197s - 12.186s) 弹片发生导通高亮
     tl.to("#k03-switch-svg #s-contact .iso-edge", { stroke: "#ff7a45", strokeWidth: 2.2, duration: 0.15 }, 11.20);
     tl.to("#k03-switch-svg .tag", { fill: "#ff7a45", duration: 0.15 }, 11.20);
-
-    // 触底后回弹恢复
     tl.to("#k03-switch-svg #s-stem", { y: 0, duration: 0.45, ease: "elastic.out(1, 0.4)" }, 12.69);
     tl.to("#k03-switch-svg #s-spring", { scaleY: 1, y: 0, duration: 0.45, ease: "elastic.out(1, 0.4)" }, 12.69);
     tl.to("#k03-switch-svg #s-contact .iso-edge", { stroke: "#e8a066", strokeWidth: 0.7, duration: 0.3 }, 12.89);
     tl.to("#k03-switch-svg .tag", { fill: "#5ad2c0", duration: 0.3 }, 12.89);
-
-    // --- 4. 悬浮微动呼吸 ---
     tl.fromTo("#k03-switch-fig", { rotation: -0.6 }, { rotation: 0.4, duration: 15.93, ease: "sine.inOut" }, 0);
     
     tl.fromTo("#k03-switch-spot",{opacity:0},{opacity:1,duration:1.1,ease:"power2.out"},0);

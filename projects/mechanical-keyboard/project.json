@@ -1,0 +1,13 @@
+{
+  "id": "mechanical-keyboard",
+  "name": "机械键盘工作原理",
+  "subtitle": "Anatomy × HyperFrames Explainer",
+  "resolution": "landscape",
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "voice": {
+    "preview": "zh-CN-YunxiNeural",
+    "production": "茉莉"
+  }
+}
