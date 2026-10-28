@@ -55,19 +55,10 @@
 
 ## 🎬 样例成片效果演示
 
-本项目自带全套 9 分镜客制化机械键盘结构拆解旗舰示例，以下为引擎由纯代码与矢量 SVG 自动化生成的 1080P 成片：
+本项目自带全套 9 分镜客制化机械键盘结构拆解旗舰示例，以下为引擎由纯代码与矢量 SVG 自动化生成的 1080P 成片（**可在网页直接点击播放**）：
 
-<p align="center">
-  <a href="https://github.com/laowang5/anatomy-hyperframes-video/raw/main/projects/mechanical-keyboard/renders/mechanical-keyboard.mp4" target="_blank" title="点击直接在线播放 1080P 高清成片">
-    <img src="projects/mechanical-keyboard/assets/figures/hero.svg" alt="机械键盘等轴测爆炸图" width="720" /><br>
-    <img src="https://img.shields.io/badge/▶_点击在线直接播放视频-1080P_全流程音画对齐-238636?style=for-the-badge&logo=quicktime&logoColor=white" alt="点击直接播放视频" />
-  </a>
-</p>
+https://github.com/user-attachments/assets/edd718c8-c0b7-4a1f-b5f8-50cfa9c46c7a
 
-> 🍿 **即点即播直达**：
-> - 🌐 **[▶ 在浏览器中直接播放 1080P 视频流 (Raw MP4 直链)](https://github.com/laowang5/anatomy-hyperframes-video/raw/main/projects/mechanical-keyboard/renders/mechanical-keyboard.mp4)**
-> - 📁 **[在 GitHub 仓库查看视频文件 (Blob View)](https://github.com/laowang5/anatomy-hyperframes-video/blob/main/projects/mechanical-keyboard/renders/mechanical-keyboard.mp4)**
-> 
 > 💡 *成片特性：等轴测机械键盘逐层爆炸、轴体下压触发动效、磁轴霍尔效应传感器、消音棉与底壳声画毫秒级对齐。*
 
 ---

@@ -51,19 +51,10 @@ This project is built directly on top of two exceptional open-source ecosystems:
 
 ## 🎬 Demo Showcase
 
-This repository includes a full 9-scene custom mechanical keyboard teardown benchmark. Below is the full 1080P video generated purely via code and vector SVGs:
+This repository includes a full 9-scene custom mechanical keyboard teardown benchmark. Below is the full 1080P video generated purely via code and vector SVGs (playable directly in GitHub):
 
-<p align="center">
-  <a href="https://github.com/laowang5/anatomy-hyperframes-video/raw/main/projects/mechanical-keyboard/renders/mechanical-keyboard.mp4" target="_blank" title="Click to stream 1080P video directly">
-    <img src="projects/mechanical-keyboard/assets/figures/hero.svg" alt="Mechanical Keyboard Isometric Hero Figure" width="720" /><br>
-    <img src="https://img.shields.io/badge/▶_Click_to_Stream_Video-1080P_Full_Alignment-238636?style=for-the-badge&logo=quicktime&logoColor=white" alt="Play Video" />
-  </a>
-</p>
+https://github.com/user-attachments/assets/edd718c8-c0b7-4a1f-b5f8-50cfa9c46c7a
 
-> 🍿 **One-Click Playback Links**:
-> - 🌐 **[▶ Stream 1080P Video Directly in Browser (Raw Stream)](https://github.com/laowang5/anatomy-hyperframes-video/raw/main/projects/mechanical-keyboard/renders/mechanical-keyboard.mp4)**
-> - 📁 **[View Media File on GitHub (Blob View)](https://github.com/laowang5/anatomy-hyperframes-video/blob/main/projects/mechanical-keyboard/renders/mechanical-keyboard.mp4)**
-> 
 > 💡 *Showcase: Isometric layer-by-layer explosion, switch actuation mechanics, Hall-effect magnetic sensor simulation, and acoustic word-boundary alignment.*
 
 ---
