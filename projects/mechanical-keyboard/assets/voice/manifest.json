@@ -1,56 +1,56 @@
 [
   {
     "id": "01-hook",
-    "duration": 8.928,
+    "duration": 9.6,
     "chars": 47,
-    "source": "edge-tts"
+    "source": "mimo-v2.5-tts"
   },
   {
     "id": "02-cap",
-    "duration": 11.112,
+    "duration": 11.68,
     "chars": 60,
-    "source": "edge-tts"
+    "source": "mimo-v2.5-tts"
   },
   {
     "id": "03-switch",
-    "duration": 15.504,
+    "duration": 14.88,
     "chars": 65,
-    "source": "edge-tts"
+    "source": "mimo-v2.5-tts"
   },
   {
     "id": "04-magnet",
-    "duration": 14.4,
+    "duration": 14.56,
     "chars": 71,
-    "source": "edge-tts"
+    "source": "mimo-v2.5-tts"
   },
   {
     "id": "05-plate",
-    "duration": 9.144,
+    "duration": 8.96,
     "chars": 45,
-    "source": "edge-tts"
+    "source": "mimo-v2.5-tts"
   },
   {
     "id": "06-pcb",
-    "duration": 9.288,
+    "duration": 9.92,
     "chars": 49,
-    "source": "edge-tts"
+    "source": "mimo-v2.5-tts"
   },
   {
     "id": "07-foam",
-    "duration": 6.408,
+    "duration": 7.2,
     "chars": 35,
-    "source": "edge-tts"
+    "source": "mimo-v2.5-tts"
   },
   {
     "id": "08-case",
-    "duration": 8.352,
+    "duration": 8.8,
     "chars": 41,
-    "source": "edge-tts"
+    "source": "mimo-v2.5-tts"
   },
   {
     "id": "09-outro",
-    "duration": 11.208,
+    "duration": 10.56,
     "chars": 50,
-    "source": "edge-tts"
+    "source": "mimo-v2.5-tts"
   }
 ]

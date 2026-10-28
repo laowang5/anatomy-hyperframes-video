@@ -1,5 +1,6 @@
 <template>
   <style>
+
 @font-face{font-family:"Microsoft YaHei";src:local("Microsoft YaHei"),local("Microsoft YaHei UI");font-weight:100 900}
 @font-face{font-family:"YaHei";src:local("Microsoft YaHei"),local("Microsoft YaHei UI");font-weight:100 900}
 #root{position:absolute;inset:0;overflow:hidden;background:#05060a;
@@ -31,18 +32,17 @@
 .figwrap img{width:100%;height:100%;object-fit:contain}
 .spot{position:absolute;right:80px;top:110px;width:1140px;height:830px;border-radius:50%;
   background:radial-gradient(circle,rgba(90,140,190,.20) 0%,rgba(90,140,190,.05) 46%,transparent 70%)}
+.watermark{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-22deg);z-index:85;
+  width:100%;text-align:center;white-space:nowrap;
+  font-family:"YaHei","Microsoft YaHei",sans-serif;font-style:italic;font-size:148px;
+  font-weight:900;letter-spacing:.12em;color:rgba(238,242,248,.045);
+  text-shadow:0 0 18px rgba(0,0,0,.22);pointer-events:none;user-select:none}
 .sub-dock{position:absolute;left:50%;bottom:52px;transform:translateX(-50%);z-index:90;
   width:1560px;height:190px;pointer-events:none}
 .sub-line{position:absolute;left:0;right:0;bottom:0;display:block;
   font-size:38px;font-weight:600;letter-spacing:.03em;color:#f8fafc;line-height:1.34;
   text-shadow:0 3px 18px rgba(0,0,0,0.95), 0 1px 4px rgba(0,0,0,0.85);
   white-space:normal;text-align:center;text-wrap:balance}
-.watermark{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-22deg);z-index:85;
-  width:100%;text-align:center;white-space:nowrap;
-  font-family:"YaHei","Microsoft YaHei",sans-serif;font-style:italic;font-size:148px;
-  font-weight:900;letter-spacing:.12em;color:rgba(238,242,248,.045);
-  text-shadow:0 0 18px rgba(0,0,0,.22);pointer-events:none;user-select:none}
-
 .iso-line{fill:none;stroke-linecap:round;stroke-linejoin:round}
 .iso-edge{fill:none;stroke-linecap:round;stroke-linejoin:round}
 .iso-crease{fill:none;stroke-linecap:round;stroke-linejoin:round}
@@ -673,8 +673,11 @@
 .m-accent2[data-lit][data-seamless]>.iso-shade[data-shade="3"]{fill:#1f6b5e;stroke:#1f6b5e;stroke-width:.45;stroke-linejoin:round}
 .m-accent2[data-lit][data-seamless]>.iso-edge{stroke:#4fd1b8;stroke-width:.7}
 .m-accent2[data-lit][data-seamless]>.iso-crease{stroke:#4fd1b8;stroke-width:.5;opacity:.5}
-.m-accent2>.iso-halo{fill:#000;opacity:.9;filter:blur(10px)}</style>
+.m-accent2>.iso-halo{fill:#000;opacity:.9;filter:blur(10px)}
+
+  </style>
   <div id="root" data-composition-id="k09-outro" data-width="1920" data-height="1080">
+
     <div class="bg"></div>
     <div class="grid"></div>
     <div class="spot" id="k09-outro-spot"></div>
@@ -690,7 +693,7 @@
     <div class="figwrap" id="k09-outro-fig">
       <img id="k09-outro-img" class="clip" src="assets/figures/stack.svg" data-start="0" data-duration="12.26" alt="">
     </div>
-    
+
     <div class="sub-dock" id="k09-outro-subdock">
       <span id="k09-outro-sub-0" class="sub-line" style="opacity:0;">键帽、轴体、定位板、电路板、硅胶垫、外壳。</span>
       <span id="k09-outro-sub-1" class="sub-line" style="opacity:0;">六层结构，几十个零件，</span>
@@ -699,6 +702,7 @@
   </div>
   <script>
     const tl = gsap.timeline({ paused: true });
+
     
     tl.fromTo("#k09-outro-img",{opacity:0,scale:.93,y:26},{opacity:1,scale:1,y:0,duration:1.05,ease:"power3.out"},0);
     tl.fromTo("#k09-outro-img",{rotation:-1.2},{rotation:0,duration:12.26,ease:"none"},0);

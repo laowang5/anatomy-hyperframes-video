@@ -3,7 +3,7 @@
 """
 Anatomy × HyperFrames 双轨 TTS 引擎 (Dual-Track Audio Alignment Engine)
 - 预览模式 (Preview/Draft): Edge-TTS + WordBoundary 词级时间戳提取 (快速/零成本/毫秒级对齐)
-- 成片模式 (Production/Final): MiMo-v2.5-TTS 高保真商业级配音 + 弹性时间戳缩放映射
+- 成片模式 (Production/Final): 高保真商业级配音 + 弹性时间戳缩放映射
 """
 
 import os
@@ -68,11 +68,24 @@ def restore_display_words(words: list, overrides: dict) -> list:
         w["text"] = orig
     return words
 
-# 解析 MIMO_API_KEY，仅查找标准系统环境变量与规范 .env
-def resolve_mimo_key(proj_dir: Path = None) -> str:
-    key = os.environ.get("MIMO_API_KEY", "").strip()
-    if key:
-        return key
+# 解析 TTS 环境变量配置，读取标准系统环境变量与规范 .env (TTS_API_KEY, TTS_BASE_URL, TTS_MODEL, TTS_VOICE, TTS_TEMPO)
+def resolve_tts_config(proj_dir: Path = None) -> dict:
+    """
+    解析生产级 TTS 环境变量配置：
+    - TTS_API_KEY: 商业模型授权密钥
+    - TTS_BASE_URL: OpenAI 兼容接口地址 (默认: https://api.openai.com/v1)
+    - TTS_MODEL: 商业模型名称 (默认: tts-1)
+    - TTS_VOICE: 默认配音音色 (默认从 TTS_VOICE 配置读取，缺省: alloy)
+    - TTS_TEMPO: 变速倍率 (默认从 TTS_TEMPO 配置读取，缺省: 1.0)
+    优先读取系统环境变量，未提供时读取规范 .env 文件
+    """
+    config = {
+        "api_key": os.environ.get("TTS_API_KEY", "").strip(),
+        "base_url": os.environ.get("TTS_BASE_URL", "").strip(),
+        "model": os.environ.get("TTS_MODEL", "").strip(),
+        "voice": os.environ.get("TTS_VOICE", "").strip(),
+        "tempo": os.environ.get("TTS_TEMPO", "").strip(),
+    }
 
     candidate_envs = []
     if proj_dir:
@@ -83,15 +96,40 @@ def resolve_mimo_key(proj_dir: Path = None) -> str:
     for env_file in candidate_envs:
         if env_file.exists():
             try:
-                for line in env_file.read_text(encoding="utf-8").splitlines():
-                    line = line.strip()
-                    if line.startswith("MIMO_API_KEY=") and not line.startswith("#"):
-                        k = line.split("=", 1)[1].strip().strip('"').strip("'")
-                        if k:
-                            return k
+                for raw_line in env_file.read_text(encoding="utf-8").splitlines():
+                    line = raw_line.strip()
+                    if not line or line.startswith("#"):
+                        continue
+                    if "=" not in line:
+                        continue
+                    k, v = line.split("=", 1)
+                    k = k.strip()
+                    v = v.strip().strip('"').strip("'")
+                    if k == "TTS_API_KEY" and not config["api_key"]:
+                        config["api_key"] = v
+                    elif k == "TTS_BASE_URL" and not config["base_url"]:
+                        config["base_url"] = v
+                    elif k == "TTS_MODEL" and not config["model"]:
+                        config["model"] = v
+                    elif k == "TTS_VOICE" and not config["voice"]:
+                        config["voice"] = v
+                    elif k == "TTS_TEMPO" and not config["tempo"]:
+                        config["tempo"] = v
             except Exception:
                 pass
-    return ""
+
+    if not config["base_url"]:
+        config["base_url"] = "https://api.openai.com/v1"
+    if not config["model"]:
+        config["model"] = "tts-1"
+    if not config["voice"]:
+        config["voice"] = "alloy"
+    try:
+        config["tempo"] = float(config["tempo"]) if config["tempo"] else 1.0
+    except ValueError:
+        config["tempo"] = 1.0
+
+    return config
 
 def probe_duration(file_path: Path) -> float:
     cmd = [
@@ -136,21 +174,21 @@ async def generate_edge_preview(text: str, out_path: Path, voice: str = "zh-CN-Y
         return word_timestamps
     raise RuntimeError("Edge-TTS 生成空音频")
 
-# ── 2. MiMo-v2.5-TTS 高保真商业级配音合成 ──
-async def generate_mimo_production(text: str, out_path: Path, voice: str = "茉莉", api_key: str = ""):
+# ── 2. 高保真商业级配音合成 (OpenAI Audio / Chat Completions 协议) ──
+async def generate_production_audio(text: str, out_path: Path, voice: str = "alloy", api_key: str = "", base_url: str = "https://api.openai.com/v1", model: str = "tts-1"):
     from openai import OpenAI
     import numpy as np
     import soundfile as sf
 
     client = OpenAI(
         api_key=api_key,
-        base_url="https://token-plan-cn.xiaomimimo.com/v1",
+        base_url=base_url,
         timeout=40.0
     )
 
     def _call():
         completion = client.chat.completions.create(
-            model="mimo-v2.5-tts",
+            model=model,
             messages=[{"role": "assistant", "content": text}],
             audio={"format": "pcm16", "voice": voice},
             stream=True
@@ -168,7 +206,7 @@ async def generate_mimo_production(text: str, out_path: Path, voice: str = "茉�
                     np_pcm = np.frombuffer(pcm_bytes, dtype=np.int16).astype(np.float32) / 32768.0
                     chunks.append(np_pcm)
         if not chunks:
-            raise RuntimeError("未收到 MiMo TTS 音频数据块")
+            raise RuntimeError("未收到商业级 TTS 音频数据块")
         return np.concatenate(chunks)
 
     loop = asyncio.get_running_loop()
@@ -300,17 +338,26 @@ def align_subtitles(sentences: list, words: list, total_dur: float) -> list:
 
 # ── 主执行流程 ──
 async def main():
-    parser = argparse.ArgumentParser(description="Dual-Track TTS Engine (Edge-TTS & MiMo-TTS)")
+    parser = argparse.ArgumentParser(description="Dual-Track TTS Engine (Edge-TTS & Production TTS)")
     parser.add_argument("--mode", choices=["preview", "production", "auto"], default="preview",
-                        help="TTS模式: preview(Edge-TTS词级对齐), production(MiMo最终渲染), auto(有Key走MiMo无Key走Edge)")
+                        help="TTS模式: preview(Edge-TTS词级对齐), production(商业级高保真最终渲染), auto(有Key走生产模型无Key走Edge)")
     parser.add_argument("--project-dir", default=None, help="目标项目沙箱路径")
     parser.add_argument("--force", action="store_true", help="强制重新合成，忽略已存在的文件缓存")
     parser.add_argument("--rate", default="+8%", help="Edge-TTS 语速，如 +8%% / -5%%（默认 +8%%）")
-    parser.add_argument("--mimo-tempo", type=float, default=float(os.environ.get("MIMO_TEMPO", "1.0")),
-                        help="MiMo 音频加速倍率（1.0=原速；用 ffmpeg atempo 变速不变调），如 1.37")
+    parser.add_argument("--voice", dest="voice", default=None,
+                        help="高保真商业配音音色（默认读取 TTS_VOICE 配置）")
+    parser.add_argument("--tempo", dest="tempo", type=float, default=None,
+                        help="高保真商业配音加速倍率（默认读取 TTS_TEMPO 配置，1.0=原速；用 ffmpeg atempo 变速不变调），如 1.37")
     args = parser.parse_args()
 
     proj_dir = Path(args.project_dir).resolve() if args.project_dir else REPO_ROOT
+    tts_config = resolve_tts_config(proj_dir)
+    api_key = tts_config["api_key"]
+    base_url = tts_config["base_url"]
+    model = tts_config["model"]
+    default_prod_voice = args.voice or tts_config["voice"]
+    tempo = args.tempo if args.tempo is not None else tts_config["tempo"]
+
     script_file = proj_dir / "script.json"
     if not script_file.exists():
         script_file = proj_dir / "geo" / "script.json"
@@ -321,24 +368,29 @@ async def main():
     voice_dir.mkdir(parents=True, exist_ok=True)
     scenes = json.loads(script_file.read_text(encoding="utf-8"))
 
-    mimo_key = resolve_mimo_key(proj_dir)
     pronunciation_overrides = load_pronunciation_overrides(proj_dir)
     if pronunciation_overrides:
         print(f"  📖 发音词典: 已加载 {len(pronunciation_overrides)} 条项目专属发音纠偏规则")
+
     mode = args.mode
     if mode == "auto":
-        mode = "production" if mimo_key else "preview"
+        mode = "production" if api_key else "preview"
 
-    if mode == "production" and not mimo_key:
-        print(f"\n❌ [TTS 错误]: 指定了 --mode production，但系统未检测到 MIMO_API_KEY 环境变量！", file=sys.stderr)
-        print(f"   生产模式要求严格产出商业高保真配音；如需本地预览开发请指定 --mode preview 或 --mode auto。\n", file=sys.stderr)
+    if mode == "production" and not api_key:
+        print(f"\n❌ [TTS 错误]: 指定了 --mode production，但未检测到 TTS_API_KEY 环境变量！", file=sys.stderr)
+        print(f"   生产模式要求严格产出商业高保真配音；请在 .env 中配置 TTS_API_KEY，或指定 --mode preview / --mode auto。\n", file=sys.stderr)
         sys.exit(1)
 
     print(f"\n{'━'*60}")
     print(f"  🎙️ 双轨音频对齐引擎 (Dual-Track TTS Engine)")
-    print(f"  🔧 执行模式: {'⚡ [Preview] Edge-TTS 快速预览' if mode == 'preview' else '🌟 [Production] MiMo-v2.5-TTS 高保真商业渲染'}")
+    print(f"  🔧 执行模式: {'⚡ [Preview] Edge-TTS 快速预览' if mode == 'preview' else '🌟 [Production] 高保真商业级渲染'}")
     if mode == "production":
-        print(f"  🔑 MiMo 授权: 已就绪 ({mimo_key[:6]}...{mimo_key[-4:]})")
+        masked_key = f"{api_key[:6]}...{api_key[-4:]}" if len(api_key) > 10 else "***"
+        print(f"  🔑 商业授权: 已就绪 ({masked_key})")
+        print(f"  🌐 接口节点: {base_url}")
+        print(f"  🤖 配音模型: {model}")
+        print(f"  🗣️ 默认音色: {default_prod_voice}")
+        print(f"  ⏱️ 语速倍率: {tempo}x")
     print(f"{'━'*60}\n")
 
     timing_data = {}
@@ -353,7 +405,14 @@ async def main():
         
         target_mp3 = voice_dir / f"{sid}.mp3"
         preview_mp3 = voice_dir / f"{sid}.preview.mp3"
-        mimo_mp3 = voice_dir / f"{sid}.mimo.mp3"
+        prod_mp3 = voice_dir / f"{sid}.production.mp3"
+        # 兼容旧版缓存并平滑迁移至规范命名
+        if not prod_mp3.exists():
+            for legacy_cand in voice_dir.glob(f"{sid}.*.mp3"):
+                if legacy_cand.name not in (f"{sid}.preview.mp3", f"{sid}.mp3", f"{sid}.production.tempo.mp3"):
+                    import shutil
+                    shutil.copyfile(legacy_cand, prod_mp3)
+                    break
 
         # 1. 始终保证具备 Edge-TTS 基础音频与词级时间戳基准
         words_cache = voice_dir / f"{sid}.words.json"
@@ -374,36 +433,36 @@ async def main():
 
         edge_dur = probe_duration(preview_mp3)
 
-        # 2. 如果是 production 模式且有 MiMo Key
+        # 2. 如果是 production 模式且有授权 Key
         final_mp3 = preview_mp3
         final_dur = edge_dur
         final_source = "edge-tts"
 
-        if mode == "production" and mimo_key:
+        if mode == "production" and api_key:
             try:
-                if args.force or not mimo_mp3.exists():
-                    print(f"  └─ 🚀 正在请求 MiMo-v2.5-TTS 高保真配音 (已应用多音字纠偏)...")
-                    await generate_mimo_production(phonetic_text, mimo_mp3, voice="茉莉", api_key=mimo_key)
-                tempo = float(getattr(args, "mimo_tempo", 1.0) or 1.0)
+                prod_voice = s.get("prod_voice", default_prod_voice)
+                if args.force or not prod_mp3.exists():
+                    print(f"  └─ 🚀 正在请求高保真商业配音 (模型: {model}, 音色: {prod_voice}, 已应用多音字纠偏)...")
+                    await generate_production_audio(phonetic_text, prod_mp3, voice=prod_voice, api_key=api_key, base_url=base_url, model=model)
                 if abs(tempo - 1.0) > 1e-3:
-                    tempo_mp3 = voice_dir / f"{sid}.mimo.tempo.mp3"
+                    tempo_mp3 = voice_dir / f"{sid}.production.tempo.mp3"
                     import subprocess
                     subprocess.run(
-                        ["ffmpeg", "-v", "error", "-y", "-i", str(mimo_mp3),
+                        ["ffmpeg", "-v", "error", "-y", "-i", str(prod_mp3),
                          "-filter:a", f"atempo={tempo:.4f}", "-b:a", "192k", str(tempo_mp3)],
                         check=True)
                     final_dur = probe_duration(tempo_mp3)
                     final_mp3 = tempo_mp3
-                    final_source = f"mimo-v2.5-tts (atempo {tempo:.2f}x)"
+                    final_source = f"{model} (atempo {tempo:.2f}x)"
                 else:
-                    final_dur = probe_duration(mimo_mp3)
-                    final_mp3 = mimo_mp3
-                    final_source = "mimo-v2.5-tts"
+                    final_dur = probe_duration(prod_mp3)
+                    final_mp3 = prod_mp3
+                    final_source = model
                 # 按真实时长弹性缩放词级时间戳
                 words = scale_timestamps(words, edge_dur, final_dur)
-                print(f"  └─ ✅ MiMo 配音完成 ({final_dur:.2f}s, 缩放比率: {final_dur/edge_dur:.2f})")
+                print(f"  └─ ✅ 高保真配音完成 ({final_dur:.2f}s, 缩放比率: {final_dur/edge_dur:.2f})")
             except Exception as e:
-                print(f"  └─ ⚠️ MiMo 合成失败，优雅降级为 Edge-TTS: {e}")
+                print(f"  └─ ⚠️ 高保真商业配音合成失败，优雅降级为 Edge-TTS: {e}")
                 final_mp3 = preview_mp3
                 final_dur = edge_dur
                 final_source = "edge-tts (fallback)"

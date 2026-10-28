@@ -201,7 +201,7 @@ switch (cmd) {
     cleanTempProfiles();
     mkdirSync(join(PROJ_DIR, "renders"), { recursive: true });
     if (mode === "production") {
-      log("TTS", "Ensuring MiMo-v2.5-TTS production audio is active...");
+      log("TTS", "Ensuring high-fidelity production audio is active...");
       execFileSync("python", ["core/tts/engine.py", "--project-dir", PROJ_DIR, "--mode", "production", ...ttsRate], {
         cwd: REPO_ROOT,
         stdio: "inherit",

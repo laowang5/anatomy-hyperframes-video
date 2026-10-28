@@ -21,6 +21,15 @@ projects/*/.hyperframes/
 *.tmp.*
 
 # ==========================================
+# Projects Sandbox Policy (Workspace Isolation)
+# ==========================================
+# Ignore all local project directories by default to prevent leaking private projects
+projects/*
+# Whitelist only official starter template & flagship reference showcase
+!projects/_template/
+!projects/mechanical-keyboard/
+
+# ==========================================
 # Generated Media Binaries (Regenerable via CLI)
 # ==========================================
 # Ignore rendered MP4 videos and cover raster images

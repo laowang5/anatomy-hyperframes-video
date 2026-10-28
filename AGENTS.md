@@ -133,7 +133,7 @@ node bin/video.mjs render --project <name> [--production] # Render final MP4
 ### 3. Dual-Track TTS & Heteronym Phonetic Decoupling
 - **Dual-Track**:
   - `preview`: Edge-TTS (`zh-CN-YunxiNeural`) for instant, zero-cost drafting and millisecond-level `WordBoundary` timestamp extraction.
-  - `production`: MiMo-v2.5-TTS (`茉莉`) for studio-quality 44.1kHz commercial audio, with timestamps elastically scaled (`mimoDur / edgeDur`).
+  - `production`: High-fidelity commercial TTS (`TTS_API_KEY` / `TTS_BASE_URL` / `TTS_MODEL`) for studio-quality 44.1kHz audio, with timestamps elastically scaled (`prodDur / edgeDur`).
 - **Phonetic Decoupling for Polyphonic Words**:
   - When technical terms have multiple pronunciations (e.g., "弹片" misread as weapon shrapnel `dàn piàn` instead of mechanical leaf `tán piàn`), decouple audio text from display text:
   - Send homophones (`谈片`) to the TTS engine so voiceover is 100% phonetically correct.
