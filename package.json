@@ -1,13 +1,33 @@
 {
-  "name": "kb-video",
-  "private": true,
+  "name": "anatomy-hyperframes-video",
+  "version": "0.1.0",
+  "description": "Code-First Engineering Anatomy & Isometric Video Generation Engine driven by HyperFrames and GSAP",
   "type": "module",
+  "bin": {
+    "hyper-video": "./bin/video.mjs"
+  },
   "scripts": {
+    "hyper-video": "node bin/video.mjs",
+    "doctor": "node bin/video.mjs doctor",
     "build": "node bin/video.mjs build",
     "dev": "node bin/video.mjs preview",
     "check": "node bin/video.mjs check",
     "render": "node bin/video.mjs render",
     "figures": "node bin/video.mjs figures",
     "scenes": "node bin/video.mjs scenes"
+  },
+  "keywords": [
+    "hyperframes",
+    "anatomy",
+    "video-generator",
+    "isometric",
+    "gsap",
+    "tts-alignment",
+    "code-to-video",
+    "automation"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

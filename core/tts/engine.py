@@ -17,52 +17,80 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 
-# ── 中文多音字与机械键盘专有术语发音纠偏表（音画解耦：画面显示规范字，语音采用明确单音字）──
-PRONUNCIATION_OVERRIDES = {
-    "两片金属弹片": "两片金属谈片",
-    "两片弹片": "两片谈片",
-    "金属弹片": "金属谈片",
-    "弹片": "谈片",
-}
+# ── 中文多音字与专有术语发音纠偏（音画解耦：画面显示规范字，语音采用明确单音字）──
+def load_pronunciation_overrides(proj_dir: Path) -> dict:
+    """从项目目录动态加载多音字与专有术语发音纠偏表"""
+    overrides = {}
+    
+    # 1. 尝试从 project.json 读取 pronunciation 字段
+    proj_json = proj_dir / "project.json"
+    if proj_json.exists():
+        try:
+            data = json.loads(proj_json.read_text(encoding="utf-8"))
+            if isinstance(data.get("pronunciation"), dict):
+                overrides.update(data["pronunciation"])
+            elif isinstance(data.get("pronunciation_overrides"), dict):
+                overrides.update(data["pronunciation_overrides"])
+        except Exception as e:
+            print(f"⚠️ [Pronunciation] 读取 project.json 发音配置失败: {e}", file=sys.stderr)
 
-def to_phonetic_text(text: str) -> str:
+    # 2. 尝试从独立 pronunciation.json 覆盖读取
+    pron_json = proj_dir / "pronunciation.json"
+    if pron_json.exists():
+        try:
+            data = json.loads(pron_json.read_text(encoding="utf-8"))
+            if isinstance(data, dict):
+                overrides.update(data)
+        except Exception as e:
+            print(f"⚠️ [Pronunciation] 读取 pronunciation.json 失败: {e}", file=sys.stderr)
+
+    return overrides
+
+def to_phonetic_text(text: str, overrides: dict) -> str:
     """将文本中的多音字替换为绝对正确的发音同音字"""
-    for src, target in PRONUNCIATION_OVERRIDES.items():
+    if not overrides:
+        return text
+    for src in sorted(overrides.keys(), key=len, reverse=True):
+        target = overrides[src]
         text = text.replace(src, target)
     return text
 
-def restore_display_words(words: list) -> list:
+def restore_display_words(words: list, overrides: dict) -> list:
     """将词级时间戳中的发音同音字还原为原展示词，保持声画元数据一致性"""
-    reverse_map = {v: k for k, v in PRONUNCIATION_OVERRIDES.items()}
-    # 补充单字映射
-    reverse_map["谈"] = "弹"
-    reverse_map["谈片"] = "弹片"
+    if not overrides:
+        return words
+    reverse_map = {v: k for k, v in overrides.items()}
     for w in words:
         orig = w.get("text", "")
-        for phon, disp in reverse_map.items():
+        for phon, disp in sorted(reverse_map.items(), key=lambda x: len(x[0]), reverse=True):
             if phon in orig:
-                w["text"] = orig.replace(phon, disp)
-                break
+                orig = orig.replace(phon, disp)
+        w["text"] = orig
     return words
 
-# 尝试从 video-team/.env 或当前 .env 提取 MIMO_API_KEY
-def resolve_mimo_key() -> str:
+# 解析 MIMO_API_KEY，仅查找标准系统环境变量与规范 .env
+def resolve_mimo_key(proj_dir: Path = None) -> str:
     key = os.environ.get("MIMO_API_KEY", "").strip()
     if key:
         return key
-    candidate_envs = [
-        REPO_ROOT / ".env",
-        REPO_ROOT.parent / "video-team" / ".env",
-        Path("G:/Workspace/video-team/.env"),
-    ]
+
+    candidate_envs = []
+    if proj_dir:
+        candidate_envs.append(proj_dir / ".env")
+    candidate_envs.append(REPO_ROOT / ".env")
+    candidate_envs.append(Path.cwd() / ".env")
+
     for env_file in candidate_envs:
         if env_file.exists():
-            for line in env_file.read_text(encoding="utf-8").splitlines():
-                line = line.strip()
-                if line.startswith("MIMO_API_KEY=") and not line.startswith("#"):
-                    k = line.split("=", 1)[1].strip().strip('"').strip("'")
-                    if k:
-                        return k
+            try:
+                for line in env_file.read_text(encoding="utf-8").splitlines():
+                    line = line.strip()
+                    if line.startswith("MIMO_API_KEY=") and not line.startswith("#"):
+                        k = line.split("=", 1)[1].strip().strip('"').strip("'")
+                        if k:
+                            return k
+            except Exception:
+                pass
     return ""
 
 def probe_duration(file_path: Path) -> float:
@@ -80,12 +108,12 @@ def probe_duration(file_path: Path) -> float:
         return 0.0
 
 # ── 1. Edge-TTS 合成与 WordBoundary 词级时间戳提取 ──
-async def generate_edge_preview(text: str, out_path: Path, voice: str = "zh-CN-YunxiNeural"):
+async def generate_edge_preview(text: str, out_path: Path, voice: str = "zh-CN-YunxiNeural", rate: str = "+8%"):
     import edge_tts
     out_path.parent.mkdir(parents=True, exist_ok=True)
     temp_path = out_path.with_suffix(".tmp.mp3")
 
-    communicate = edge_tts.Communicate(text, voice, rate="+8%", boundary="WordBoundary")
+    communicate = edge_tts.Communicate(text, voice, rate=rate, boundary="WordBoundary")
     word_timestamps = []
 
     with open(temp_path, "wb") as f:
@@ -277,6 +305,9 @@ async def main():
                         help="TTS模式: preview(Edge-TTS词级对齐), production(MiMo最终渲染), auto(有Key走MiMo无Key走Edge)")
     parser.add_argument("--project-dir", default=None, help="目标项目沙箱路径")
     parser.add_argument("--force", action="store_true", help="强制重新合成，忽略已存在的文件缓存")
+    parser.add_argument("--rate", default="+8%", help="Edge-TTS 语速，如 +8%% / -5%%（默认 +8%%）")
+    parser.add_argument("--mimo-tempo", type=float, default=float(os.environ.get("MIMO_TEMPO", "1.0")),
+                        help="MiMo 音频加速倍率（1.0=原速；用 ffmpeg atempo 变速不变调），如 1.37")
     args = parser.parse_args()
 
     proj_dir = Path(args.project_dir).resolve() if args.project_dir else REPO_ROOT
@@ -290,7 +321,10 @@ async def main():
     voice_dir.mkdir(parents=True, exist_ok=True)
     scenes = json.loads(script_file.read_text(encoding="utf-8"))
 
-    mimo_key = resolve_mimo_key()
+    mimo_key = resolve_mimo_key(proj_dir)
+    pronunciation_overrides = load_pronunciation_overrides(proj_dir)
+    if pronunciation_overrides:
+        print(f"  📖 发音词典: 已加载 {len(pronunciation_overrides)} 条项目专属发音纠偏规则")
     mode = args.mode
     if mode == "auto":
         mode = "production" if mimo_key else "preview"
@@ -314,7 +348,7 @@ async def main():
     for idx, s in enumerate(scenes, start=1):
         sid = s["id"]
         text = s["text"]
-        phonetic_text = to_phonetic_text(text)
+        phonetic_text = to_phonetic_text(text, pronunciation_overrides)
         edge_voice = s.get("voice", "zh-CN-YunxiNeural")
         
         target_mp3 = voice_dir / f"{sid}.mp3"
@@ -332,8 +366,8 @@ async def main():
 
         if not words or args.force or not preview_mp3.exists():
             print(f"[{idx}/{len(scenes)}] 正在提取 Edge-TTS 词级时间戳: {sid}...")
-            words = await generate_edge_preview(phonetic_text, preview_mp3, voice=edge_voice)
-            words = restore_display_words(words)
+            words = await generate_edge_preview(phonetic_text, preview_mp3, voice=edge_voice, rate=args.rate)
+            words = restore_display_words(words, pronunciation_overrides)
             words_cache.write_text(json.dumps(words, indent=2, ensure_ascii=False), encoding="utf-8")
         else:
             print(f"[{idx}/{len(scenes)}] 复用已有 Edge-TTS 时间戳缓存: {sid} ({len(words)} 词)")
@@ -350,9 +384,21 @@ async def main():
                 if args.force or not mimo_mp3.exists():
                     print(f"  └─ 🚀 正在请求 MiMo-v2.5-TTS 高保真配音 (已应用多音字纠偏)...")
                     await generate_mimo_production(phonetic_text, mimo_mp3, voice="茉莉", api_key=mimo_key)
-                final_dur = probe_duration(mimo_mp3)
-                final_mp3 = mimo_mp3
-                final_source = "mimo-v2.5-tts"
+                tempo = float(getattr(args, "mimo_tempo", 1.0) or 1.0)
+                if abs(tempo - 1.0) > 1e-3:
+                    tempo_mp3 = voice_dir / f"{sid}.mimo.tempo.mp3"
+                    import subprocess
+                    subprocess.run(
+                        ["ffmpeg", "-v", "error", "-y", "-i", str(mimo_mp3),
+                         "-filter:a", f"atempo={tempo:.4f}", "-b:a", "192k", str(tempo_mp3)],
+                        check=True)
+                    final_dur = probe_duration(tempo_mp3)
+                    final_mp3 = tempo_mp3
+                    final_source = f"mimo-v2.5-tts (atempo {tempo:.2f}x)"
+                else:
+                    final_dur = probe_duration(mimo_mp3)
+                    final_mp3 = mimo_mp3
+                    final_source = "mimo-v2.5-tts"
                 # 按真实时长弹性缩放词级时间戳
                 words = scale_timestamps(words, edge_dur, final_dur)
                 print(f"  └─ ✅ MiMo 配音完成 ({final_dur:.2f}s, 缩放比率: {final_dur/edge_dur:.2f})")

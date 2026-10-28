@@ -1,0 +1,15 @@
+[project]
+name = "anatomy-hyperframes-tts"
+version = "0.1.0"
+description = "Dual-track TTS synthesis & timestamp alignment engine for Anatomy-HyperFrames Video"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "edge-tts>=6.1.12",
+    "requests>=2.31.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+

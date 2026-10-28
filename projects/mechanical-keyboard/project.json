@@ -9,5 +9,12 @@
   "voice": {
     "preview": "zh-CN-YunxiNeural",
     "production": "茉莉"
+  },
+  "watermark": "@智能体老王",
+  "pronunciation": {
+    "两片金属弹片": "两片金属谈片",
+    "两片弹片": "两片谈片",
+    "金属弹片": "金属谈片",
+    "弹片": "谈片"
   }
 }

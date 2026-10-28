@@ -1,5 +1,6 @@
 <template>
   <style>
+@font-face{font-family:"Microsoft YaHei";src:local("Microsoft YaHei"),local("Microsoft YaHei UI");font-weight:100 900}
 @font-face{font-family:"YaHei";src:local("Microsoft YaHei"),local("Microsoft YaHei UI");font-weight:100 900}
 #root{position:absolute;inset:0;overflow:hidden;background:#05060a;
   font-family:"YaHei",sans-serif;color:#eef2f8}
@@ -10,9 +11,9 @@
                    linear-gradient(90deg,rgba(120,150,190,.055) 1px,transparent 1px);
   background-size:64px 64px;
   -webkit-mask-image:radial-gradient(75% 65% at 50% 50%,#000 30%,transparent 100%)}
-.rule{position:absolute;left:96px;top:150px;width:2px;height:0;background:linear-gradient(180deg,#ff7a45,rgba(255,122,69,0))}
+.rule{position:absolute;left:96px;top:150px;width:2px;height:0;background:linear-gradient(180deg,#ff7a45,rgba(0,0,0,0))}
 .num{position:absolute;left:96px;top:92px;font-family:"JetBrains Mono",Consolas,monospace;
-  font-size:15px;letter-spacing:.34em;color:#ff8a5c}
+  font-size:15px;letter-spacing:.34em;color:#ff8a5c;text-shadow:0 0 14px #ff7a4544}
 .en{position:absolute;left:96px;top:120px;font-family:"JetBrains Mono",Consolas,monospace;
   font-size:13px;letter-spacing:.42em;color:#8391a3}
 .h1{position:absolute;left:94px;top:186px;width:560px;font-size:64px;line-height:1.22;
@@ -22,7 +23,7 @@
 .list{position:absolute;left:96px;top:560px;width:520px}
 .row{position:relative;height:52px;display:flex;align-items:center;gap:18px;
   border-bottom:1px solid rgba(120,150,190,.13)}
-.row i{width:6px;height:6px;border-radius:50%;background:#ff7a45;flex:none}
+.row i{width:6px;height:6px;border-radius:50%;background:#ff7a45;box-shadow:0 0 8px #ff7a4588;flex:none}
 .row b{font-size:23px;font-weight:500;color:#dbe3ee;letter-spacing:.02em}
 .row span{font-family:"JetBrains Mono",Consolas,monospace;font-size:12px;letter-spacing:.1em;
   color:#8391a3;margin-left:auto;padding-right:4px}
@@ -31,10 +32,16 @@
 .spot{position:absolute;right:80px;top:110px;width:1140px;height:830px;border-radius:50%;
   background:radial-gradient(circle,rgba(90,140,190,.20) 0%,rgba(90,140,190,.05) 46%,transparent 70%)}
 .sub-dock{position:absolute;left:50%;bottom:52px;transform:translateX(-50%);z-index:90;
-  width:100%;max-width:1600px;display:flex;justify-content:center;align-items:center;pointer-events:none}
-.sub-line{font-size:38px;font-weight:600;letter-spacing:.03em;color:#f8fafc;
+  width:1560px;height:190px;pointer-events:none}
+.sub-line{position:absolute;left:0;right:0;bottom:0;display:block;
+  font-size:38px;font-weight:600;letter-spacing:.03em;color:#f8fafc;line-height:1.34;
   text-shadow:0 3px 18px rgba(0,0,0,0.95), 0 1px 4px rgba(0,0,0,0.85);
-  white-space:nowrap;text-align:center}
+  white-space:normal;text-align:center;text-wrap:balance}
+.watermark{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-22deg);z-index:85;
+  width:100%;text-align:center;white-space:nowrap;
+  font-family:"YaHei","Microsoft YaHei",sans-serif;font-style:italic;font-size:148px;
+  font-weight:900;letter-spacing:.12em;color:rgba(238,242,248,.045);
+  text-shadow:0 0 18px rgba(0,0,0,.22);pointer-events:none;user-select:none}
 
 .iso-line{fill:none;stroke-linecap:round;stroke-linejoin:round}
 .iso-edge{fill:none;stroke-linecap:round;stroke-linejoin:round}
@@ -671,29 +678,30 @@
     <div class="bg"></div>
     <div class="grid"></div>
     <div class="spot" id="k09-outro-spot"></div>
+    <div class="watermark" data-layout-ignore="true"><i>@智能体老王</i></div>
     <div class="rule" id="k09-outro-rule"></div>
-    <div id="k09-outro-num" class="clip num" data-start="0" data-duration="11.61">09</div>
-    <div id="k09-outro-en" class="clip en" data-start="0" data-duration="11.61">ONE MOTION</div>
-    <h1 id="k09-outro-h1" class="clip h1" data-start="0" data-duration="11.61">六层结构，一个动作</h1>
-    <p id="k09-outro-lead" class="clip lead" data-start="0" data-duration="11.61">键帽、轴体、定位板、电路板、硅胶垫、外壳。几十个零件，最后只为了：按下，然后松开。</p>
-    <div id="k09-outro-list" class="clip list" data-start="0" data-duration="11.61">
+    <div id="k09-outro-num" class="clip num" data-start="0" data-duration="12.26">09</div>
+    <div id="k09-outro-en" class="clip en" data-start="0" data-duration="12.26">ONE MOTION</div>
+    <h1 id="k09-outro-h1" class="clip h1" data-start="0" data-duration="12.26">六层结构，一个动作</h1>
+    <p id="k09-outro-lead" class="clip lead" data-start="0" data-duration="12.26">键帽、轴体、定位板、电路板、硅胶垫、外壳。几十个零件，最后只为了：按下，然后松开。</p>
+    <div id="k09-outro-list" class="clip list" data-start="0" data-duration="12.26">
 
     </div>
     <div class="figwrap" id="k09-outro-fig">
-      <img id="k09-outro-img" class="clip" src="assets/figures/stack.svg" data-start="0" data-duration="11.61" alt="">
+      <img id="k09-outro-img" class="clip" src="assets/figures/stack.svg" data-start="0" data-duration="12.26" alt="">
     </div>
     
     <div class="sub-dock" id="k09-outro-subdock">
-      <span id="k09-outro-sub-0" class="sub-line" style="opacity:0;position:absolute;white-space:nowrap;">键帽、轴体、定位板、电路板、硅胶垫、外壳。</span>
-      <span id="k09-outro-sub-1" class="sub-line" style="opacity:0;position:absolute;white-space:nowrap;">六层结构，几十个零件，</span>
-      <span id="k09-outro-sub-2" class="sub-line" style="opacity:0;position:absolute;white-space:nowrap;">最后只为了一个动作：按下，然后松开。</span>
+      <span id="k09-outro-sub-0" class="sub-line" style="opacity:0;">键帽、轴体、定位板、电路板、硅胶垫、外壳。</span>
+      <span id="k09-outro-sub-1" class="sub-line" style="opacity:0;">六层结构，几十个零件，</span>
+      <span id="k09-outro-sub-2" class="sub-line" style="opacity:0;">最后只为了一个动作：按下，然后松开。</span>
     </div>
   </div>
   <script>
     const tl = gsap.timeline({ paused: true });
     
     tl.fromTo("#k09-outro-img",{opacity:0,scale:.93,y:26},{opacity:1,scale:1,y:0,duration:1.05,ease:"power3.out"},0);
-    tl.fromTo("#k09-outro-img",{rotation:-1.2},{rotation:0,duration:11.61,ease:"none"},0);
+    tl.fromTo("#k09-outro-img",{rotation:-1.2},{rotation:0,duration:12.26,ease:"none"},0);
     
     tl.fromTo("#k09-outro-spot",{opacity:0},{opacity:1,duration:1.1,ease:"power2.out"},0);
     tl.fromTo("#k09-outro-num",{opacity:0,y:-10},{opacity:1,y:0,duration:.5,ease:"power3.out"},.05);
@@ -702,12 +710,12 @@
     tl.fromTo("#k09-outro-h1",{opacity:0,y:24},{opacity:1,y:0,duration:.7,ease:"power3.out"},.3);
     tl.fromTo("#k09-outro-lead",{opacity:0,y:16},{opacity:1,y:0,duration:.65,ease:"power3.out"},.55);
 
-    tl.fromTo("#k09-outro-sub-0", {opacity:0, y:8}, {opacity:1, y:0, duration:0.25, ease:"power2.out"}, 0.10)
-      .to("#k09-outro-sub-0", {opacity:0, y:-6, duration:0.2, ease:"power2.in"}, 4.39);
-    tl.fromTo("#k09-outro-sub-1", {opacity:0, y:8}, {opacity:1, y:0, duration:0.25, ease:"power2.out"}, 4.88)
-      .to("#k09-outro-sub-1", {opacity:0, y:-6, duration:0.2, ease:"power2.in"}, 6.74);
-    tl.fromTo("#k09-outro-sub-2", {opacity:0, y:8}, {opacity:1, y:0, duration:0.25, ease:"power2.out"}, 6.91)
-      .to("#k09-outro-sub-2", {opacity:0, y:-6, duration:0.2, ease:"power2.in"}, 9.78);
+    tl.fromTo("#k09-outro-sub-0", {opacity:0, y:8}, {opacity:1, y:0, duration:0.25, ease:"power2.out", overwrite:"auto"}, 0.1)
+      .to("#k09-outro-sub-0", {opacity:0, y:-6, duration:0.2, ease:"power2.in", overwrite:"auto"}, 4.46);
+    tl.fromTo("#k09-outro-sub-1", {opacity:0, y:8}, {opacity:1, y:0, duration:0.25, ease:"power2.out", overwrite:"auto"}, 5.18)
+      .to("#k09-outro-sub-1", {opacity:0, y:-6, duration:0.2, ease:"power2.in", overwrite:"auto"}, 6.95);
+    tl.fromTo("#k09-outro-sub-2", {opacity:0, y:8}, {opacity:1, y:0, duration:0.25, ease:"power2.out", overwrite:"auto"}, 7.34)
+      .to("#k09-outro-sub-2", {opacity:0, y:-6, duration:0.2, ease:"power2.in", overwrite:"auto"}, 10.18);
     window.__timelines["k09-outro"] = tl;
   </script>
 </template>

@@ -1,20 +1,45 @@
+# ==========================================
 # Dependency directories
+# ==========================================
 node_modules/
 .venv/
 __pycache__/
 
+# ==========================================
+# Environment & Secrets (Never commit secrets!)
+# ==========================================
+.env
+.env.*
+!.env.example
+
+# ==========================================
 # HyperFrames runtime & extraction caches
+# ==========================================
 .hyperframes/
+projects/*/.hyperframes/
 *.tmp
 *.tmp.*
 
+# ==========================================
 # Generated Media Binaries (Regenerable via CLI)
-projects/*/renders/*.mp4
-projects/*/assets/voice/*.mp3
-projects/*/preview/
-renders/*.mp4
+# ==========================================
+# Ignore rendered MP4 videos and cover raster images
+projects/*/renders/*
+!projects/*/renders/.gitkeep
+renders/*
 
+# Ignore preview snapshots
+projects/*/preview/*
+!projects/*/preview/.gitkeep
+
+# Ignore generated audio binaries (keep word-level JSON metadata)
+projects/*/assets/voice/*.mp3
+projects/*/assets/voice/*.wav
+projects/*/assets/voice/*.m4a
+
+# ==========================================
 # OS & Editor files
+# ==========================================
 .DS_Store
 Thumbs.db
 .idea/

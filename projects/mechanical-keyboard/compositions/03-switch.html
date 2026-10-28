@@ -1,5 +1,6 @@
 <template>
   <style>
+@font-face{font-family:"Microsoft YaHei";src:local("Microsoft YaHei"),local("Microsoft YaHei UI");font-weight:100 900}
 @font-face{font-family:"YaHei";src:local("Microsoft YaHei"),local("Microsoft YaHei UI");font-weight:100 900}
 #root{position:absolute;inset:0;overflow:hidden;background:#05060a;
   font-family:"YaHei",sans-serif;color:#eef2f8}
@@ -10,9 +11,9 @@
                    linear-gradient(90deg,rgba(120,150,190,.055) 1px,transparent 1px);
   background-size:64px 64px;
   -webkit-mask-image:radial-gradient(75% 65% at 50% 50%,#000 30%,transparent 100%)}
-.rule{position:absolute;left:96px;top:150px;width:2px;height:0;background:linear-gradient(180deg,#ff7a45,rgba(255,122,69,0))}
+.rule{position:absolute;left:96px;top:150px;width:2px;height:0;background:linear-gradient(180deg,#ff7a45,rgba(0,0,0,0))}
 .num{position:absolute;left:96px;top:92px;font-family:"JetBrains Mono",Consolas,monospace;
-  font-size:15px;letter-spacing:.34em;color:#ff8a5c}
+  font-size:15px;letter-spacing:.34em;color:#ff8a5c;text-shadow:0 0 14px #ff7a4544}
 .en{position:absolute;left:96px;top:120px;font-family:"JetBrains Mono",Consolas,monospace;
   font-size:13px;letter-spacing:.42em;color:#8391a3}
 .h1{position:absolute;left:94px;top:186px;width:560px;font-size:64px;line-height:1.22;
@@ -22,7 +23,7 @@
 .list{position:absolute;left:96px;top:560px;width:520px}
 .row{position:relative;height:52px;display:flex;align-items:center;gap:18px;
   border-bottom:1px solid rgba(120,150,190,.13)}
-.row i{width:6px;height:6px;border-radius:50%;background:#ff7a45;flex:none}
+.row i{width:6px;height:6px;border-radius:50%;background:#ff7a45;box-shadow:0 0 8px #ff7a4588;flex:none}
 .row b{font-size:23px;font-weight:500;color:#dbe3ee;letter-spacing:.02em}
 .row span{font-family:"JetBrains Mono",Consolas,monospace;font-size:12px;letter-spacing:.1em;
   color:#8391a3;margin-left:auto;padding-right:4px}
@@ -31,10 +32,16 @@
 .spot{position:absolute;right:80px;top:110px;width:1140px;height:830px;border-radius:50%;
   background:radial-gradient(circle,rgba(90,140,190,.20) 0%,rgba(90,140,190,.05) 46%,transparent 70%)}
 .sub-dock{position:absolute;left:50%;bottom:52px;transform:translateX(-50%);z-index:90;
-  width:100%;max-width:1600px;display:flex;justify-content:center;align-items:center;pointer-events:none}
-.sub-line{font-size:38px;font-weight:600;letter-spacing:.03em;color:#f8fafc;
+  width:1560px;height:190px;pointer-events:none}
+.sub-line{position:absolute;left:0;right:0;bottom:0;display:block;
+  font-size:38px;font-weight:600;letter-spacing:.03em;color:#f8fafc;line-height:1.34;
   text-shadow:0 3px 18px rgba(0,0,0,0.95), 0 1px 4px rgba(0,0,0,0.85);
-  white-space:nowrap;text-align:center}
+  white-space:normal;text-align:center;text-wrap:balance}
+.watermark{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-22deg);z-index:85;
+  width:100%;text-align:center;white-space:nowrap;
+  font-family:"YaHei","Microsoft YaHei",sans-serif;font-style:italic;font-size:148px;
+  font-weight:900;letter-spacing:.12em;color:rgba(238,242,248,.045);
+  text-shadow:0 0 18px rgba(0,0,0,.22);pointer-events:none;user-select:none}
 
 .iso-line{fill:none;stroke-linecap:round;stroke-linejoin:round}
 .iso-edge{fill:none;stroke-linecap:round;stroke-linejoin:round}
@@ -671,30 +678,31 @@
     <div class="bg"></div>
     <div class="grid"></div>
     <div class="spot" id="k03-switch-spot"></div>
+    <div class="watermark" data-layout-ignore="true"><i>@智能体老王</i></div>
     <div class="rule" id="k03-switch-rule"></div>
-    <div id="k03-switch-num" class="clip num" data-start="0" data-duration="15.93">03</div>
-    <div id="k03-switch-en" class="clip en" data-start="0" data-duration="15.93">MECHANICAL SWITCH</div>
-    <h1 id="k03-switch-h1" class="clip h1" data-start="0" data-duration="15.93">机械轴：一次真实的接触</h1>
-    <p id="k03-switch-lead" class="clip lead" data-start="0" data-duration="15.93">轴心压着弹簧下沉，两片金属弹片接触，电路闭合。</p>
-    <div id="k03-switch-list" class="clip list" data-start="0" data-duration="15.93">
-      <div id="k03-switch-r0" class="clip row" data-start="0" data-duration="15.93">
-        <i></i><b>上盖</b><span>TOP HOUSING</span>
+    <div id="k03-switch-num" class="clip num" data-start="0" data-duration="16.55">03</div>
+    <div id="k03-switch-en" class="clip en" data-start="0" data-duration="16.55">MECHANICAL SWITCH</div>
+    <h1 id="k03-switch-h1" class="clip h1" data-start="0" data-duration="16.55">机械轴：一次真实的接触</h1>
+    <p id="k03-switch-lead" class="clip lead" data-start="0" data-duration="16.55">轴心压着弹簧下沉，两片金属弹片接触，电路闭合。</p>
+    <div id="k03-switch-list" class="clip list" data-start="0" data-duration="16.55">
+      <div id="k03-switch-r0" class="clip row" data-start="0" data-duration="16.55">
+        <i></i><b>上盖</b><span data-layout-ignore="true">TOP HOUSING</span>
       </div>
-      <div id="k03-switch-r1" class="clip row" data-start="0" data-duration="15.93">
-        <i></i><b>轴心</b><span>STEM</span>
+      <div id="k03-switch-r1" class="clip row" data-start="0" data-duration="16.55">
+        <i></i><b>轴心</b><span data-layout-ignore="true">STEM</span>
       </div>
-      <div id="k03-switch-r2" class="clip row" data-start="0" data-duration="15.93">
-        <i></i><b>弹簧</b><span>SPRING</span>
+      <div id="k03-switch-r2" class="clip row" data-start="0" data-duration="16.55">
+        <i></i><b>弹簧</b><span data-layout-ignore="true">SPRING</span>
       </div>
-      <div id="k03-switch-r3" class="clip row" data-start="0" data-duration="15.93">
-        <i></i><b>弹片</b><span>LEAF</span>
+      <div id="k03-switch-r3" class="clip row" data-start="0" data-duration="16.55">
+        <i></i><b>弹片</b><span data-layout-ignore="true">LEAF</span>
       </div>
-      <div id="k03-switch-r4" class="clip row" data-start="0" data-duration="15.93">
-        <i></i><b>下盖</b><span>BOTTOM</span>
+      <div id="k03-switch-r4" class="clip row" data-start="0" data-duration="16.55">
+        <i></i><b>下盖</b><span data-layout-ignore="true">BOTTOM</span>
       </div>
     </div>
     <div class="figwrap" id="k03-switch-fig">
-      <svg id="k03-switch-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 1080" class="clip fig" data-start="0" data-duration="15.93" style="width:100%;height:100%;object-fit:contain;">
+      <svg id="k03-switch-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 1080" class="clip fig" data-start="0" data-duration="16.55" style="width:100%;height:100%;object-fit:contain;">
 <style>.iso-line{fill:none;stroke-linecap:round;stroke-linejoin:round}
 .iso-edge{fill:none;stroke-linecap:round;stroke-linejoin:round}
 .iso-crease{fill:none;stroke-linecap:round;stroke-linejoin:round}
@@ -1369,35 +1377,35 @@
     </div>
     
     <div class="sub-dock" id="k03-switch-subdock">
-      <span id="k03-switch-sub-0" class="sub-line" style="opacity:0;position:absolute;white-space:nowrap;">拔掉键帽，下面是轴体。</span>
-      <span id="k03-switch-sub-1" class="sub-line" style="opacity:0;position:absolute;white-space:nowrap;">上盖、轴心、弹簧、两片金属弹片，</span>
-      <span id="k03-switch-sub-2" class="sub-line" style="opacity:0;position:absolute;white-space:nowrap;">还有下盖。</span>
-      <span id="k03-switch-sub-3" class="sub-line" style="opacity:0;position:absolute;white-space:nowrap;">按下时轴心压着弹簧下沉，两片弹片接触，</span>
-      <span id="k03-switch-sub-4" class="sub-line" style="opacity:0;position:absolute;white-space:nowrap;">电路闭合，一次按键就完成了。</span>
+      <span id="k03-switch-sub-0" class="sub-line" style="opacity:0;">拔掉键帽，下面是轴体。</span>
+      <span id="k03-switch-sub-1" class="sub-line" style="opacity:0;">上盖、轴心、弹簧、两片金属弹片，</span>
+      <span id="k03-switch-sub-2" class="sub-line" style="opacity:0;">还有下盖。</span>
+      <span id="k03-switch-sub-3" class="sub-line" style="opacity:0;">按下时轴心压着弹簧下沉，两片弹片接触，</span>
+      <span id="k03-switch-sub-4" class="sub-line" style="opacity:0;">电路闭合，一次按键就完成了。</span>
     </div>
   </div>
   <script>
     const tl = gsap.timeline({ paused: true });
     
     tl.fromTo("#k03-switch-svg",{opacity:0,scale:.93,y:26},{opacity:1,scale:1,y:0,duration:1.05,ease:"power3.out"},0);
-    tl.to("#k03-switch-svg #s-top .iso-edge", { stroke: "#ff7a45", strokeWidth: 1.6, duration: 0.2 }, 2.43)
-      .to("#k03-switch-svg #s-top .iso-edge", { stroke: "#5d6878", strokeWidth: 0.7, duration: 0.4 }, 2.73);
-    tl.to("#k03-switch-svg #s-stem .iso-edge", { stroke: "#ff7a45", strokeWidth: 1.8, duration: 0.2 }, 3.27)
-      .to("#k03-switch-svg #s-stem .iso-edge", { stroke: "#7b8595", strokeWidth: 0.7, duration: 0.4 }, 3.57);
-    tl.to("#k03-switch-svg #s-spring", { scaleY: 0.9, yoyo: true, repeat: 1, duration: 0.25, transformOrigin: "620px 680px" }, 4.1);
-    tl.to("#k03-switch-svg #s-contact .iso-edge", { stroke: "#ff7a45", strokeWidth: 1.8, duration: 0.2 }, 5.69)
-      .to("#k03-switch-svg #s-contact .iso-edge", { stroke: "#e8a066", strokeWidth: 0.7, duration: 0.4 }, 5.99);
-    tl.to("#k03-switch-svg #s-bottom .iso-edge", { stroke: "#ff7a45", strokeWidth: 1.6, duration: 0.2 }, 1.1)
-      .to("#k03-switch-svg #s-bottom .iso-edge", { stroke: "#7b8595", strokeWidth: 0.7, duration: 0.4 }, 1.40);
+    tl.to("#k03-switch-svg #s-top .iso-edge", { stroke: "#ff7a45", strokeWidth: 1.6, duration: 0.2 }, 2.54)
+      .to("#k03-switch-svg #s-top .iso-edge", { stroke: "#5d6878", strokeWidth: 0.7, duration: 0.4 }, 2.84);
+    tl.to("#k03-switch-svg #s-stem .iso-edge", { stroke: "#ff7a45", strokeWidth: 1.8, duration: 0.2 }, 3.4)
+      .to("#k03-switch-svg #s-stem .iso-edge", { stroke: "#7b8595", strokeWidth: 0.7, duration: 0.4 }, 3.70);
+    tl.to("#k03-switch-svg #s-spring", { scaleY: 0.9, yoyo: true, repeat: 1, duration: 0.25, transformOrigin: "620px 680px" }, 4.27);
+    tl.to("#k03-switch-svg #s-contact .iso-edge", { stroke: "#ff7a45", strokeWidth: 1.8, duration: 0.2 }, 5.93)
+      .to("#k03-switch-svg #s-contact .iso-edge", { stroke: "#e8a066", strokeWidth: 0.7, duration: 0.4 }, 6.23);
+    tl.to("#k03-switch-svg #s-bottom .iso-edge", { stroke: "#ff7a45", strokeWidth: 1.6, duration: 0.2 }, 1.15)
+      .to("#k03-switch-svg #s-bottom .iso-edge", { stroke: "#7b8595", strokeWidth: 0.7, duration: 0.4 }, 1.45);
     tl.to("#k03-switch-svg #s-stem", { y: "+=30", duration: 0.32, ease: "power2.in" }, 7.6);
     tl.to("#k03-switch-svg #s-spring", { scaleY: 0.78, y: "+=12", transformOrigin: "620px 680px", duration: 0.32, ease: "power2.in" }, 7.6);
-    tl.to("#k03-switch-svg #s-contact .iso-edge", {"stroke":"#ff7a45","strokeWidth":2.2,"duration":0.15}, 11.2);
-    tl.to("#k03-switch-svg .tag", {"fill":"#ff7a45","duration":0.15}, 11.2);
-    tl.to("#k03-switch-svg #s-stem", { y: 0, duration: 0.45, ease: "elastic.out(1, 0.4)" }, 12.69);
-    tl.to("#k03-switch-svg #s-spring", { scaleY: 1, y: 0, transformOrigin: "620px 680px", duration: 0.45, ease: "elastic.out(1, 0.4)" }, 12.69);
-    tl.to("#k03-switch-svg #s-contact .iso-edge", {"stroke":"#e8a066","strokeWidth":0.7,"duration":0.3}, 12.89);
-    tl.to("#k03-switch-svg .tag", {"fill":"#5ad2c0","duration":0.3}, 12.89);
-    tl.fromTo("#k03-switch-fig", { rotation: -0.6 }, { rotation: 0.4, duration: 15.93, ease: "sine.inOut" }, 0);
+    tl.to("#k03-switch-svg #s-contact .iso-edge", {"stroke":"#ff7a45","strokeWidth":2.2,"duration":0.15}, 11.67);
+    tl.to("#k03-switch-svg .tag", {"fill":"#ff7a45","duration":0.15}, 11.67);
+    tl.to("#k03-switch-svg #s-stem", { y: 0, duration: 0.45, ease: "elastic.out(1, 0.4)" }, 13.2);
+    tl.to("#k03-switch-svg #s-spring", { scaleY: 1, y: 0, transformOrigin: "620px 680px", duration: 0.45, ease: "elastic.out(1, 0.4)" }, 13.2);
+    tl.to("#k03-switch-svg #s-contact .iso-edge", {"stroke":"#e8a066","strokeWidth":0.7,"duration":0.3}, 13.4);
+    tl.to("#k03-switch-svg .tag", {"fill":"#5ad2c0","duration":0.3}, 13.4);
+    tl.fromTo("#k03-switch-fig", { rotation: -0.6 }, { rotation: 0.4, duration: 16.55, ease: "sine.inOut" }, 0);
     
     tl.fromTo("#k03-switch-spot",{opacity:0},{opacity:1,duration:1.1,ease:"power2.out"},0);
     tl.fromTo("#k03-switch-num",{opacity:0,y:-10},{opacity:1,y:0,duration:.5,ease:"power3.out"},.05);
@@ -1410,16 +1418,16 @@
     tl.fromTo("#k03-switch-r2",{opacity:0,x:-18},{opacity:1,x:0,duration:.42,ease:"power3.out"},1.17);
     tl.fromTo("#k03-switch-r3",{opacity:0,x:-18},{opacity:1,x:0,duration:.42,ease:"power3.out"},1.28);
     tl.fromTo("#k03-switch-r4",{opacity:0,x:-18},{opacity:1,x:0,duration:.42,ease:"power3.out"},1.39);
-    tl.fromTo("#k03-switch-sub-0", {opacity:0, y:8}, {opacity:1, y:0, duration:0.25, ease:"power2.out"}, 0.10)
-      .to("#k03-switch-sub-0", {opacity:0, y:-6, duration:0.2, ease:"power2.in"}, 1.93);
-    tl.fromTo("#k03-switch-sub-1", {opacity:0, y:8}, {opacity:1, y:0, duration:0.25, ease:"power2.out"}, 2.43)
-      .to("#k03-switch-sub-1", {opacity:0, y:-6, duration:0.2, ease:"power2.in"}, 6.13);
-    tl.fromTo("#k03-switch-sub-2", {opacity:0, y:8}, {opacity:1, y:0, duration:0.25, ease:"power2.out"}, 6.46)
-      .to("#k03-switch-sub-2", {opacity:0, y:-6, duration:0.2, ease:"power2.in"}, 7.18);
-    tl.fromTo("#k03-switch-sub-3", {opacity:0, y:8}, {opacity:1, y:0, duration:0.25, ease:"power2.out"}, 7.68)
-      .to("#k03-switch-sub-3", {opacity:0, y:-6, duration:0.2, ease:"power2.in"}, 11.59);
-    tl.fromTo("#k03-switch-sub-4", {opacity:0, y:8}, {opacity:1, y:0, duration:0.25, ease:"power2.out"}, 11.89)
-      .to("#k03-switch-sub-4", {opacity:0, y:-6, duration:0.2, ease:"power2.in"}, 14.11);
+    tl.fromTo("#k03-switch-sub-0", {opacity:0, y:8}, {opacity:1, y:0, duration:0.25, ease:"power2.out", overwrite:"auto"}, 0.1)
+      .to("#k03-switch-sub-0", {opacity:0, y:-6, duration:0.2, ease:"power2.in", overwrite:"auto"}, 1.81);
+    tl.fromTo("#k03-switch-sub-1", {opacity:0, y:8}, {opacity:1, y:0, duration:0.25, ease:"power2.out", overwrite:"auto"}, 2.54)
+      .to("#k03-switch-sub-1", {opacity:0, y:-6, duration:0.2, ease:"power2.in", overwrite:"auto"}, 6.19);
+    tl.fromTo("#k03-switch-sub-2", {opacity:0, y:8}, {opacity:1, y:0, duration:0.22, ease:"power2.out", overwrite:"auto"}, 6.74)
+      .to("#k03-switch-sub-2", {opacity:0, y:-6, duration:0.19, ease:"power2.in", overwrite:"auto"}, 7.29);
+    tl.fromTo("#k03-switch-sub-3", {opacity:0, y:8}, {opacity:1, y:0, duration:0.25, ease:"power2.out", overwrite:"auto"}, 8)
+      .to("#k03-switch-sub-3", {opacity:0, y:-6, duration:0.2, ease:"power2.in", overwrite:"auto"}, 11.87);
+    tl.fromTo("#k03-switch-sub-4", {opacity:0, y:8}, {opacity:1, y:0, duration:0.25, ease:"power2.out", overwrite:"auto"}, 12.38)
+      .to("#k03-switch-sub-4", {opacity:0, y:-6, duration:0.2, ease:"power2.in", overwrite:"auto"}, 14.5);
     window.__timelines["k03-switch"] = tl;
   </script>
 </template>

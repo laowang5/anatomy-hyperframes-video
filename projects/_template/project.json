@@ -4,5 +4,6 @@
   "resolution": "landscape",
   "width": 1920,
   "height": 1080,
-  "fps": 30
+  "fps": 30,
+  "watermark": "@智能体老王"
 }

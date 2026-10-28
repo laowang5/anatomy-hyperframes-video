@@ -5,8 +5,15 @@
     <title>机械键盘工作原理 — Anatomy × HyperFrames</title>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
     <style>
+      @font-face{font-family:"Microsoft YaHei";src:local("Microsoft YaHei"),local("Microsoft YaHei UI");font-weight:100 900}
+      @font-face{font-family:"YaHei";src:local("Microsoft YaHei"),local("Microsoft YaHei UI");font-weight:100 900}
       html,body{margin:0;padding:0;background:#05060a;width:1920px;height:1080px;overflow:hidden}
       .scene{position:absolute;inset:0;width:100%;height:100%}
+      .watermark{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-22deg);z-index:85;
+        width:100%;text-align:center;white-space:nowrap;
+        font-family:"Microsoft YaHei","YaHei",sans-serif;font-style:italic;font-size:148px;
+        font-weight:900;letter-spacing:.12em;color:rgba(238,242,248,.045);
+        text-shadow:0 0 18px rgba(0,0,0,.22);pointer-events:none;user-select:none}
     </style>
   </head>
   <body>
@@ -15,7 +22,7 @@
       data-root="true"
       data-composition-id="main"
       data-start="0"
-      data-duration="105.61"
+      data-duration="103.79"
       data-width="1920"
       data-height="1080"
     >
@@ -25,7 +32,7 @@
         data-composition-id="k01-hook"
         data-composition-src="compositions/01-hook.html"
         data-start="0"
-        data-duration="10.65"
+        data-duration="9.98"
         data-track-index="1"
         data-track-kind="graphics"
       ></div>
@@ -34,8 +41,8 @@
         class="scene"
         data-composition-id="k02-cap"
         data-composition-src="compositions/02-cap.html"
-        data-start="10.65"
-        data-duration="12.73"
+        data-start="9.98"
+        data-duration="12.16"
         data-track-index="1"
         data-track-kind="graphics"
       ></div>
@@ -44,8 +51,8 @@
         class="scene"
         data-composition-id="k03-switch"
         data-composition-src="compositions/03-switch.html"
-        data-start="23.38"
-        data-duration="15.93"
+        data-start="22.14"
+        data-duration="16.55"
         data-track-index="1"
         data-track-kind="graphics"
       ></div>
@@ -54,8 +61,8 @@
         class="scene"
         data-composition-id="k04-magnet"
         data-composition-src="compositions/04-magnet.html"
-        data-start="39.31"
-        data-duration="15.61"
+        data-start="38.69"
+        data-duration="15.45"
         data-track-index="1"
         data-track-kind="graphics"
       ></div>
@@ -64,8 +71,8 @@
         class="scene"
         data-composition-id="k05-plate"
         data-composition-src="compositions/05-plate.html"
-        data-start="54.92"
-        data-duration="10.01"
+        data-start="54.14"
+        data-duration="10.19"
         data-track-index="1"
         data-track-kind="graphics"
       ></div>
@@ -74,8 +81,8 @@
         class="scene"
         data-composition-id="k06-pcb"
         data-composition-src="compositions/06-pcb.html"
-        data-start="64.93"
-        data-duration="10.97"
+        data-start="64.33"
+        data-duration="10.34"
         data-track-index="1"
         data-track-kind="graphics"
       ></div>
@@ -84,8 +91,8 @@
         class="scene"
         data-composition-id="k07-foam"
         data-composition-src="compositions/07-foam.html"
-        data-start="75.9"
-        data-duration="8.25"
+        data-start="74.67"
+        data-duration="7.46"
         data-track-index="1"
         data-track-kind="graphics"
       ></div>
@@ -94,8 +101,8 @@
         class="scene"
         data-composition-id="k08-case"
         data-composition-src="compositions/08-case.html"
-        data-start="84.15"
-        data-duration="9.85"
+        data-start="82.13"
+        data-duration="9.4"
         data-track-index="1"
         data-track-kind="graphics"
       ></div>
@@ -104,8 +111,8 @@
         class="scene"
         data-composition-id="k09-outro"
         data-composition-src="compositions/09-outro.html"
-        data-start="94"
-        data-duration="11.61"
+        data-start="91.53"
+        data-duration="12.26"
         data-track-index="1"
         data-track-kind="graphics"
       ></div>
@@ -113,74 +120,75 @@
       id="vo-01-hook"
       src="assets/voice/01-hook.mp3"
       data-start="0"
-      data-duration="9.6"
+      data-duration="8.928"
       data-track-index="2"
       data-volume="1"
     ></audio>
     <audio
       id="vo-02-cap"
       src="assets/voice/02-cap.mp3"
-      data-start="10.65"
-      data-duration="11.68"
+      data-start="9.98"
+      data-duration="11.112"
       data-track-index="2"
       data-volume="1"
     ></audio>
     <audio
       id="vo-03-switch"
       src="assets/voice/03-switch.mp3"
-      data-start="23.38"
-      data-duration="14.88"
+      data-start="22.14"
+      data-duration="15.504"
       data-track-index="2"
       data-volume="1"
     ></audio>
     <audio
       id="vo-04-magnet"
       src="assets/voice/04-magnet.mp3"
-      data-start="39.31"
-      data-duration="14.56"
+      data-start="38.69"
+      data-duration="14.4"
       data-track-index="2"
       data-volume="1"
     ></audio>
     <audio
       id="vo-05-plate"
       src="assets/voice/05-plate.mp3"
-      data-start="54.92"
-      data-duration="8.96"
+      data-start="54.14"
+      data-duration="9.144"
       data-track-index="2"
       data-volume="1"
     ></audio>
     <audio
       id="vo-06-pcb"
       src="assets/voice/06-pcb.mp3"
-      data-start="64.93"
-      data-duration="9.92"
+      data-start="64.33"
+      data-duration="9.288"
       data-track-index="2"
       data-volume="1"
     ></audio>
     <audio
       id="vo-07-foam"
       src="assets/voice/07-foam.mp3"
-      data-start="75.9"
-      data-duration="7.2"
+      data-start="74.67"
+      data-duration="6.408"
       data-track-index="2"
       data-volume="1"
     ></audio>
     <audio
       id="vo-08-case"
       src="assets/voice/08-case.mp3"
-      data-start="84.15"
-      data-duration="8.8"
+      data-start="82.13"
+      data-duration="8.352"
       data-track-index="2"
       data-volume="1"
     ></audio>
     <audio
       id="vo-09-outro"
       src="assets/voice/09-outro.mp3"
-      data-start="94"
-      data-duration="10.56"
+      data-start="91.53"
+      data-duration="11.208"
       data-track-index="2"
       data-volume="1"
     ></audio>
+      <div class="watermark" data-layout-ignore="true"><i>@智能体老王</i></div>
     </div>
     <script>
       window.__timelines = window.__timelines || {};

@@ -15,20 +15,25 @@ const dur = (f) => {
 
 const esc = (x) => String(x).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-const BASE_CSS = `
+function makeBaseCss(theme = {}) {
+  const accent = theme.accent || "#ff7a45";
+  const numColor = theme.accent || "#ff8a5c";
+  const bg = theme.bg || "#05060a";
+  return `
+@font-face{font-family:"Microsoft YaHei";src:local("Microsoft YaHei"),local("Microsoft YaHei UI");font-weight:100 900}
 @font-face{font-family:"YaHei";src:local("Microsoft YaHei"),local("Microsoft YaHei UI");font-weight:100 900}
-#root{position:absolute;inset:0;overflow:hidden;background:#05060a;
+#root{position:absolute;inset:0;overflow:hidden;background:${bg};
   font-family:"YaHei",sans-serif;color:#eef2f8}
 .bg{position:absolute;inset:0;
-  background:radial-gradient(120% 90% at 62% 44%,#161c25 0%,#0b0e13 52%,#05060a 100%)}
+  background:radial-gradient(120% 90% at 62% 44%,#161c25 0%,#0b0e13 52%,${bg} 100%)}
 .grid{position:absolute;inset:0;opacity:.5;
   background-image:linear-gradient(rgba(120,150,190,.055) 1px,transparent 1px),
                    linear-gradient(90deg,rgba(120,150,190,.055) 1px,transparent 1px);
   background-size:64px 64px;
   -webkit-mask-image:radial-gradient(75% 65% at 50% 50%,#000 30%,transparent 100%)}
-.rule{position:absolute;left:96px;top:150px;width:2px;height:0;background:linear-gradient(180deg,#ff7a45,rgba(255,122,69,0))}
+.rule{position:absolute;left:96px;top:150px;width:2px;height:0;background:linear-gradient(180deg,${accent},rgba(0,0,0,0))}
 .num{position:absolute;left:96px;top:92px;font-family:"JetBrains Mono",Consolas,monospace;
-  font-size:15px;letter-spacing:.34em;color:#ff8a5c}
+  font-size:15px;letter-spacing:.34em;color:${numColor};text-shadow:0 0 14px ${accent}44}
 .en{position:absolute;left:96px;top:120px;font-family:"JetBrains Mono",Consolas,monospace;
   font-size:13px;letter-spacing:.42em;color:#8391a3}
 .h1{position:absolute;left:94px;top:186px;width:560px;font-size:64px;line-height:1.22;
@@ -38,7 +43,7 @@ const BASE_CSS = `
 .list{position:absolute;left:96px;top:560px;width:520px}
 .row{position:relative;height:52px;display:flex;align-items:center;gap:18px;
   border-bottom:1px solid rgba(120,150,190,.13)}
-.row i{width:6px;height:6px;border-radius:50%;background:#ff7a45;flex:none}
+.row i{width:6px;height:6px;border-radius:50%;background:${accent};box-shadow:0 0 8px ${accent}88;flex:none}
 .row b{font-size:23px;font-weight:500;color:#dbe3ee;letter-spacing:.02em}
 .row span{font-family:"JetBrains Mono",Consolas,monospace;font-size:12px;letter-spacing:.1em;
   color:#8391a3;margin-left:auto;padding-right:4px}
@@ -47,11 +52,18 @@ const BASE_CSS = `
 .spot{position:absolute;right:80px;top:110px;width:1140px;height:830px;border-radius:50%;
   background:radial-gradient(circle,rgba(90,140,190,.20) 0%,rgba(90,140,190,.05) 46%,transparent 70%)}
 .sub-dock{position:absolute;left:50%;bottom:52px;transform:translateX(-50%);z-index:90;
-  width:100%;max-width:1600px;display:flex;justify-content:center;align-items:center;pointer-events:none}
-.sub-line{font-size:38px;font-weight:600;letter-spacing:.03em;color:#f8fafc;
+  width:1560px;height:190px;pointer-events:none}
+.sub-line{position:absolute;left:0;right:0;bottom:0;display:block;
+  font-size:38px;font-weight:600;letter-spacing:.03em;color:#f8fafc;line-height:1.34;
   text-shadow:0 3px 18px rgba(0,0,0,0.95), 0 1px 4px rgba(0,0,0,0.85);
-  white-space:nowrap;text-align:center}
+  white-space:normal;text-align:center;text-wrap:balance}
+.watermark{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-22deg);z-index:85;
+  width:100%;text-align:center;white-space:nowrap;
+  font-family:"YaHei","Microsoft YaHei",sans-serif;font-style:italic;font-size:148px;
+  font-weight:900;letter-spacing:.12em;color:rgba(238,242,248,.045);
+  text-shadow:0 0 18px rgba(0,0,0,.22);pointer-events:none;user-select:none}
 `;
+}
 
 function getWordTime(timings, sceneId, word, fallback) {
   const scene = timings[sceneId];
@@ -97,12 +109,22 @@ function compileHighlights(svgId, highlights, timings, sceneId) {
 
 export async function compileProject(projectDir) {
   const dir = resolve(projectDir);
+  const customCompiler = join(dir, "custom-compiler.mjs");
+  if (existsSync(customCompiler)) {
+    const { compileProject: customCompile } = await import(pathToFileURL(customCompiler).href);
+    return await customCompile(projectDir);
+  }
+
   const voiceDir = join(dir, "assets/voice");
   const figDir = join(dir, "assets/figures");
   const compDir = join(dir, "compositions");
   mkdirSync(compDir, { recursive: true });
 
   // 1. 加载场景配置与元数据
+  const projJsonFile = join(dir, "project.json");
+  const projMeta = existsSync(projJsonFile) ? JSON.parse(readFileSync(projJsonFile, "utf8")) : {};
+  const watermarkText = projMeta.watermark ? String(projMeta.watermark).trim() : "";
+
   const configFile = join(dir, "scenes.config.mjs");
   if (!existsSync(configFile)) {
     throw new Error(`scenes.config.mjs not found in ${dir}`);
@@ -146,7 +168,7 @@ export async function compileProject(projectDir) {
     const rows = (s.lines || [])
       .map(
         ([cn, en], i) => `      <div id="${s.key}-r${i}" class="clip row" data-start="0" data-duration="${d}">
-        <i></i><b>${esc(cn)}</b><span>${esc(en)}</span>
+        <i></i><b>${esc(cn)}</b><span data-layout-ignore="true">${esc(en)}</span>
       </div>`
       )
       .join("\n");
@@ -191,7 +213,7 @@ export async function compileProject(projectDir) {
       ${sceneSubs
         .map(
           (sub, i) =>
-            `<span id="${s.key}-sub-${i}" class="sub-line" style="opacity:0;position:absolute;white-space:nowrap;">${esc(
+            `<span id="${s.key}-sub-${i}" class="sub-line" style="opacity:0;">${esc(
               sub.text
             )}</span>`
         )
@@ -200,19 +222,24 @@ export async function compileProject(projectDir) {
 
     const subAnim = sceneSubs
       .map((sub, i) => {
-        const inT = sub.start.toFixed(2);
-        const outT = sub.end.toFixed(2);
-        return `    tl.fromTo("#${s.key}-sub-${i}", {opacity:0, y:8}, {opacity:1, y:0, duration:0.25, ease:"power2.out"}, ${inT})
-      .to("#${s.key}-sub-${i}", {opacity:0, y:-6, duration:0.2, ease:"power2.in"}, ${outT});`;
+        const dur = Math.max(0.3, sub.end - sub.start);
+        const inDur = Math.min(0.25, Number((dur * 0.3).toFixed(2)));
+        const outDur = Math.min(0.2, Number((dur * 0.25).toFixed(2)));
+        const inT = Number(sub.start.toFixed(2));
+        const outT = Math.max(Number((inT + inDur + 0.05).toFixed(2)), Number((sub.end - outDur).toFixed(2)));
+        return `    tl.fromTo("#${s.key}-sub-${i}", {opacity:0, y:8}, {opacity:1, y:0, duration:${inDur}, ease:"power2.out", overwrite:"auto"}, ${inT})
+      .to("#${s.key}-sub-${i}", {opacity:0, y:-6, duration:${outDur}, ease:"power2.in", overwrite:"auto"}, ${outT});`;
       })
       .join("\n");
 
+    const baseCss = makeBaseCss(projMeta.theme);
     const html = `<template>
-  <style>${BASE_CSS}\n${matCss()}</style>
+  <style>${baseCss}\n${matCss()}</style>
   <div id="root" data-composition-id="${s.key}" data-width="1920" data-height="1080">
     <div class="bg"></div>
     <div class="grid"></div>
     <div class="spot" id="${s.key}-spot"></div>
+    ${watermarkText ? `<div class="watermark" data-layout-ignore="true"><i>${esc(watermarkText)}</i></div>` : ""}
     <div class="rule" id="${s.key}-rule"></div>
     <div id="${s.key}-num" class="clip num" data-start="0" data-duration="${d}">${s.num}</div>
     <div id="${s.key}-en" class="clip en" data-start="0" data-duration="${d}">${esc(s.en)}</div>
@@ -269,6 +296,44 @@ ${subAnim}
     ></audio>`
   ).join("\n");
 
+  // 额外音轨：BGM + 音效（来自 project.json 的 audio 字段）。
+  // HyperFrames 引擎的 audioStage 会自动把根 index.html 里所有 <audio> 混成成品音轨，
+  // 所以这里只需把元素写进去，不需要自己调用 ffmpeg 混音。
+  const audioCfg = (() => {
+    const p = join(dir, "project.json");
+    if (!existsSync(p)) return null;
+    try {
+      return JSON.parse(readFileSync(p, "utf8")).audio || null;
+    } catch {
+      return null;
+    }
+  })();
+
+  const audioEl = (a) => {
+    const attrs = [
+      `id="${esc(a.id)}"`,
+      `src="${esc(a.src)}"`,
+      `data-start="${a.start ?? 0}"`,
+      `data-duration="${a.duration ?? TOTAL}"`,
+      `data-track-index="${a.trackIndex ?? 3}"`,
+      `data-volume="${a.volume ?? 1}"`,
+    ];
+    if (a.fadeIn) attrs.push(`data-fade-in="${a.fadeIn}"`);
+    if (a.fadeOut) attrs.push(`data-fade-out="${a.fadeOut}"`);
+    if (a.automation) {
+      const json = JSON.stringify(a.automation).replace(/'/g, "&#39;");
+      attrs.push(`data-automation='${json}'`);
+    }
+    return `    <audio\n      ${attrs.join("\n      ")}\n    ></audio>`;
+  };
+
+  const extraAudios = [];
+  if (audioCfg?.bgm) extraAudios.push(audioEl({ id: "bgm", trackIndex: 3, ...audioCfg.bgm }));
+  for (const s of audioCfg?.sfx || []) {
+    extraAudios.push(audioEl({ trackIndex: 3, volume: 0.12, ...s }));
+  }
+  const extraBlock = extraAudios.length ? "\n" + extraAudios.join("\n") : "";
+
   const indexHtml = `<!DOCTYPE html>
 <html lang="zh-CN" data-resolution="landscape">
   <head>
@@ -276,8 +341,15 @@ ${subAnim}
     <title>${esc(sTitle(dir))} — Anatomy × HyperFrames</title>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
     <style>
-      html,body{margin:0;padding:0;background:#05060a;width:1920px;height:1080px;overflow:hidden}
+      @font-face{font-family:"Microsoft YaHei";src:local("Microsoft YaHei"),local("Microsoft YaHei UI");font-weight:100 900}
+      @font-face{font-family:"YaHei";src:local("Microsoft YaHei"),local("Microsoft YaHei UI");font-weight:100 900}
+      html,body{margin:0;padding:0;background:${projMeta.theme?.bg || "#05060a"};width:1920px;height:1080px;overflow:hidden}
       .scene{position:absolute;inset:0;width:100%;height:100%}
+      .watermark{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-22deg);z-index:85;
+        width:100%;text-align:center;white-space:nowrap;
+        font-family:"Microsoft YaHei","YaHei",sans-serif;font-style:italic;font-size:148px;
+        font-weight:900;letter-spacing:.12em;color:rgba(238,242,248,.045);
+        text-shadow:0 0 18px rgba(0,0,0,.22);pointer-events:none;user-select:none}
     </style>
   </head>
   <body>
@@ -291,7 +363,8 @@ ${subAnim}
       data-height="1080"
     >
 ${hosts}
-${audios}
+${audios}${extraBlock}
+      ${watermarkText ? `<div class="watermark" data-layout-ignore="true"><i>${esc(watermarkText)}</i></div>` : ""}
     </div>
     <script>
       window.__timelines = window.__timelines || {};
