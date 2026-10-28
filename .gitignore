@@ -35,6 +35,7 @@ projects/*
 # Ignore rendered MP4 videos and cover raster images
 projects/*/renders/*
 !projects/*/renders/.gitkeep
+!projects/mechanical-keyboard/renders/mechanical-keyboard.mp4
 renders/*
 
 # Ignore preview snapshots

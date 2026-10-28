@@ -6,10 +6,18 @@
 </p>
 
 <p align="center">
-  <a href="#quickstart">Quickstart</a> •
-  <a href="#core-features">Features</a> •
-  <a href="#architecture">Architecture</a> •
-  <a href="#cli-reference">CLI Reference</a> •
+  <b>English</b> •
+  <a href="README_zh.md">简体中文</a>
+</p>
+
+<p align="center">
+  <a href="#-what-is-this">Overview</a> •
+  <a href="#-upstream-foundations-hyperframes--anatomy">Foundations</a> •
+  <a href="#-demo-showcase">Demo Showcase</a> •
+  <a href="#-core-features">Features</a> •
+  <a href="#%EF%B8%8F-architecture-topology">Architecture</a> •
+  <a href="#-quickstart">Quickstart</a> •
+  <a href="#-cli-reference">CLI Reference</a> •
   <a href="THIRD_PARTY_NOTICES.md">Third-Party Notices</a> •
   <a href="LICENSE">License</a>
 </p>
@@ -25,6 +33,32 @@ Traditional motion graphics and 3D teardown videos (Blender, Cinema 4D, After Ef
 2. **Acoustic Timeline Derivation**: The engine synthesizes audio, extracts millisecond-accurate word boundaries, and automatically deduces every scene's duration and animation trigger points.
 3. **Pure Code Vector Mechanics**: High-precision isometric SVG figures (Anatomy Kit) with GSAP material-piercing animations.
 4. **Deterministic Headless Rendering**: Frame-by-frame headless browser rendering through HyperFrames, fully verified against WCAG AA contrast, layout, and motion quality gates.
+
+---
+
+## 🧩 Upstream Foundations: HyperFrames × Anatomy
+
+This project is built directly on top of two exceptional open-source ecosystems:
+
+1. **[HyperFrames](https://github.com/hyperframes/hyperframes)** (*"Write HTML. Render video. Built for agents."*):
+   - **Video Synthesis Host**: Provides headless Chrome offscreen frame-by-frame capture, millisecond timeline synchronization, hot-reloading Studio preview, and 1080P MP4 export.
+   - **CLI Environment**: Driven by `@hyperframes/cli` (via global install, local dependency, or automatic `npx` execution).
+2. **[Anatomy](https://github.com/wheresryan22/anatomy)** (*"Explain an idea by building it as a real, working object."*):
+   - **Isometric Vector Geometry**: Provides parametric 3D isometric projection algorithms, face normal calculation, lighting buckets, and mechanical assembly hierarchy.
+   - **Zero-Setup Embedded Kit**: The core 3D projection operators are pre-bundled in [`vendor/anatomy-kit`](vendor/anatomy-kit). For AI agent-driven coding workflows, you can also add its native skill via `npx skills add wheresryan22/anatomy`.
+
+---
+
+## 🎬 Demo Showcase
+
+This repository includes a full 9-scene custom mechanical keyboard teardown benchmark. Below is the full 1080P video generated purely via code and vector SVGs:
+
+<p align="center">
+  <video src="projects/mechanical-keyboard/renders/mechanical-keyboard.mp4" controls width="100%"></video>
+</p>
+
+> 📹 **Direct Relative Link**: [projects/mechanical-keyboard/renders/mechanical-keyboard.mp4](projects/mechanical-keyboard/renders/mechanical-keyboard.mp4)  
+> 💡 *Includes: Isometric layer-by-layer explosion, switch actuation mechanics, Hall-effect magnetic sensor simulation, and acoustic word-boundary alignment.*
 
 ---
 
@@ -65,20 +99,38 @@ anatomy-hyperframes-video/
 
 ## 🚀 Quickstart
 
-### 1. Prerequisites
+### 1. Prerequisites & Environment Setup
 
-Make sure you have installed:
-- **Node.js** ≥ 18.0.0
-- **Python** ≥ 3.10
-- **FFmpeg & FFprobe** (Available in your system PATH)
-- **uv** (Recommended Python package manager) or standard `pip`
+Before getting started, make sure you have the following environments installed:
+
+1. **Core Toolchain**:
+   - **Node.js** ≥ 18.0.0
+   - **Python** ≥ 3.10
+   - **FFmpeg & FFprobe** (Configured in your system PATH)
+   - **uv** (Recommended Python package manager) or standard `pip`
+
+2. **HyperFrames Video Renderer**:
+   This project relies on `@hyperframes/cli` for browser timeline orchestration and frame-by-frame rendering:
+   ```bash
+   # Install HyperFrames CLI globally (Recommended)
+   npm install -g hyperframes
+   
+   # Or let the engine invoke it via npx on first run
+   ```
+   > 💡 **Headless Chrome**: On your first `check` or `render`, HyperFrames will automatically download the matching `chrome-headless-shell` binary into your local cache (`~/.cache/hyperframes/chrome/`). You can also specify an existing browser via `HYPERFRAMES_BROWSER_PATH`.
+
+3. **Anatomy Isometric Geometry**:
+   - The core 3D isometric polygon algorithms are **pre-bundled** in [`vendor/anatomy-kit`](vendor/anatomy-kit), ready out-of-the-box.
+   - For Cursor, Claude Code, or Antigravity agents, install the native skill via: `npx skills add wheresryan22/anatomy`.
+
+---
 
 ### 2. Installation & Doctor Check
 
 Clone the repository and install dependencies:
 
 ```bash
-git clone https://github.com/your-username/anatomy-hyperframes-video.git
+git clone https://github.com/laowang5/anatomy-hyperframes-video.git
 cd anatomy-hyperframes-video
 
 # Install Python audio dependencies
@@ -99,6 +151,7 @@ A healthy environment output will look like:
   ✅ uv (Package Mgr)  : 0.12.17
   ✅ FFmpeg            : ffmpeg version 9.0.1
   ✅ FFprobe           : ffprobe version 9.0.1
+  ✅ HyperFrames CLI   : @hyperframes/cli ready
   ✅ Chrome Headless   : .../chrome-headless-shell.exe
   ✅ Python Modules    : edge-tts & requests ready
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

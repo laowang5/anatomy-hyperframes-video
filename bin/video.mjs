@@ -60,6 +60,13 @@ if (cmd === "doctor") {
   checkCommand("FFmpeg", "ffmpeg", ["-version"], /ffmpeg version [^\s]+/);
   checkCommand("FFprobe", "ffprobe", ["-version"], /ffprobe version [^\s]+/);
 
+  const hfCli = resolveHyperFramesCli();
+  if (hfCli) {
+    const isNpx = hfCli.bin.startsWith("npx");
+    const hfLabel = isNpx ? "npx hyperframes (online fallback)" : hfCli.args[0] || hfCli.bin;
+    console.log(`  ✅ \x1b[32m${"HyperFrames CLI".padEnd(18)}\x1b[0m: ${hfLabel}`);
+  }
+
   if (chromePath && existsSync(chromePath)) {
     console.log(`  ✅ \x1b[32m${"Chrome Headless".padEnd(18)}\x1b[0m: ${chromePath}`);
   } else {

@@ -1,6 +1,6 @@
 {
   "01-hook": {
-    "source": "mimo-v2.5-tts",
+    "source": "",
     "duration": 9.6,
     "words": [
       {
@@ -168,7 +168,7 @@
     ]
   },
   "02-cap": {
-    "source": "mimo-v2.5-tts",
+    "source": "",
     "duration": 11.68,
     "words": [
       {
@@ -376,7 +376,7 @@
     ]
   },
   "03-switch": {
-    "source": "mimo-v2.5-tts",
+    "source": "",
     "duration": 14.88,
     "words": [
       {
@@ -584,7 +584,7 @@
     ]
   },
   "04-magnet": {
-    "source": "mimo-v2.5-tts",
+    "source": "",
     "duration": 14.56,
     "words": [
       {
@@ -827,7 +827,7 @@
     ]
   },
   "05-plate": {
-    "source": "mimo-v2.5-tts",
+    "source": "",
     "duration": 8.96,
     "words": [
       {
@@ -985,7 +985,7 @@
     ]
   },
   "06-pcb": {
-    "source": "mimo-v2.5-tts",
+    "source": "",
     "duration": 9.92,
     "words": [
       {
@@ -1148,7 +1148,7 @@
     ]
   },
   "07-foam": {
-    "source": "mimo-v2.5-tts",
+    "source": "",
     "duration": 7.2,
     "words": [
       {
@@ -1261,7 +1261,7 @@
     ]
   },
   "08-case": {
-    "source": "mimo-v2.5-tts",
+    "source": "",
     "duration": 8.8,
     "words": [
       {
@@ -1404,7 +1404,7 @@
     ]
   },
   "09-outro": {
-    "source": "mimo-v2.5-tts",
+    "source": "",
     "duration": 10.56,
     "words": [
       {
