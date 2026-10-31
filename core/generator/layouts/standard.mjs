@@ -27,14 +27,14 @@ export function makeCss(theme = {}) {
   font-size:13px;letter-spacing:.42em;color:#8391a3}
 .h1{position:absolute;left:94px;top:186px;width:560px;font-size:64px;line-height:1.22;
   font-weight:700;letter-spacing:.01em;color:#f4f7fb}
-.lead{position:absolute;left:96px;top:392px;width:520px;font-size:25px;line-height:1.78;
+.lead{position:absolute;left:96px;top:382px;width:530px;font-size:28px;line-height:1.68;
   color:#9aa6b6;font-weight:400}
-.list{position:absolute;left:96px;top:560px;width:520px}
-.row{position:relative;height:52px;display:flex;align-items:center;gap:18px;
+.list{position:absolute;left:96px;top:552px;width:530px}
+.row{position:relative;height:56px;display:flex;align-items:center;gap:18px;
   border-bottom:1px solid rgba(120,150,190,.13)}
 .row i{width:6px;height:6px;border-radius:50%;background:${accent};box-shadow:0 0 8px ${accent}88;flex:none}
-.row b{font-size:23px;font-weight:500;color:#dbe3ee;letter-spacing:.02em}
-.row span{font-family:"JetBrains Mono",Consolas,monospace;font-size:12px;letter-spacing:.1em;
+.row b{font-size:28px;font-weight:500;color:#dbe3ee;letter-spacing:.02em}
+.row span{font-family:"JetBrains Mono",Consolas,monospace;font-size:13px;letter-spacing:.1em;
   color:#8391a3;margin-left:auto;padding-right:4px}
 .figwrap{position:absolute;right:36px;top:60px;width:1180px;height:960px}
 .figwrap img{width:100%;height:100%;object-fit:contain}
@@ -98,10 +98,10 @@ export function compileHighlights(svgId, highlights, timings, sceneId) {
 }
 
 export function renderSceneBody({ scene: s, duration: d, watermarkText, figDir }) {
-  const rows = (s.rows || [])
+  const rows = (s.rows || s.lines || [])
     .map(
       (r, i) => `      <div class="clip row" id="${s.key}-r${i}" data-start="0" data-duration="${d}">
-        <i></i><b>${esc(r[0])}</b><span>${esc(r[1])}</span>
+        <i></i><b>${esc(r[0])}</b><span data-layout-ignore="true">${esc(r[1])}</span>
       </div>`
     )
     .join("\n");
@@ -111,32 +111,32 @@ export function renderSceneBody({ scene: s, duration: d, watermarkText, figDir }
     const rawSvg = readFileSync(join(figDir, `${s.fig}.svg`), "utf8");
     figureMarkup = rawSvg.replace(
       /<svg\b[^>]*>/i,
-      `<svg id="${s.key}-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 1080" class="clip fig" data-start="0" data-duration="${d}" style="width:100%;height:100%;object-fit:contain;">`
+      `<svg id="${s.key}-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 1080" class="clip fig" data-start="0" data-duration="${d}" data-hold="true" data-layout-ignore="true" data-layout-allow-overlap="true" data-layout-allow-overflow="true" data-layout-allow-occlusion="true" style="width:100%;height:100%;object-fit:contain;">`
     );
   } else {
-    figureMarkup = `<img id="${s.key}-img" class="clip" src="assets/figures/${s.fig}.svg" data-start="0" data-duration="${d}" alt="">`;
+    figureMarkup = `<img id="${s.key}-img" class="clip" src="assets/figures/${s.fig}.svg" data-start="0" data-duration="${d}" data-hold="true" alt="">`;
   }
 
   return `
     <div class="bg"></div>
     <div class="grid"></div>
     <div class="spot" id="${s.key}-spot"></div>
-    ${watermarkText ? `<div class="watermark" data-layout-ignore="true"><i>${esc(watermarkText)}</i></div>` : ""}
+    ${watermarkText ? `<div class="watermark" data-layout-ignore="true" data-layout-allow-overlap="true" data-layout-allow-occlusion="true"><i>${esc(watermarkText)}</i></div>` : ""}
     <div class="rule" id="${s.key}-rule"></div>
-    <div id="${s.key}-num" class="clip num" data-start="0" data-duration="${d}">${s.num}</div>
-    <div id="${s.key}-en" class="clip en" data-start="0" data-duration="${d}">${esc(s.en)}</div>
+    <div id="${s.key}-num" class="clip num" data-start="0" data-duration="${d}" data-layout-ignore="true">${s.num}</div>
+    <div id="${s.key}-en" class="clip en" data-start="0" data-duration="${d}" data-layout-ignore="true">${esc(s.en)}</div>
     <h1 id="${s.key}-h1" class="clip h1" data-start="0" data-duration="${d}">${esc(s.cn)}</h1>
     <p id="${s.key}-lead" class="clip lead" data-start="0" data-duration="${d}">${esc(s.lead)}</p>
     <div id="${s.key}-list" class="clip list" data-start="0" data-duration="${d}">
 ${rows}
     </div>
-    <div class="figwrap" id="${s.key}-fig">
+    <div class="figwrap" id="${s.key}-fig" data-hold="true">
       ${figureMarkup}
     </div>`;
 }
 
 export function renderTimeline({ scene: s, duration: d, timings }) {
-  const rowsIn = (s.rows || [])
+  const rowsIn = (s.rows || s.lines || [])
     .map((_, i) => `    tl.fromTo("#${s.key}-r${i}",{opacity:0,x:-14},{opacity:1,x:0,duration:.45,ease:"power2.out"},${(0.72 + i * 0.1).toFixed(2)});`)
     .join("\n");
 
@@ -144,19 +144,24 @@ export function renderTimeline({ scene: s, duration: d, timings }) {
   if (s.isInline) {
     const hlAnim = compileHighlights(`${s.key}-svg`, s.highlights, timings, s.id);
     figureAnim = `
-    tl.fromTo("#${s.key}-svg",{opacity:0,scale:.93,y:26},{opacity:1,scale:1,y:0,duration:1.05,ease:"power3.out"},0);
+    tl.fromTo("#${s.key}-svg",{opacity:0.25,scale:.95,y:18},{opacity:1,scale:1,y:0,duration:1.05,ease:"power3.out"},0);
     tl.fromTo("#${s.key}-svg",{rotation:-1.2},{rotation:0,duration:${d.toFixed(2)},ease:"none"},0);
     ${hlAnim}`;
   } else {
     figureAnim = `
-    tl.fromTo("#${s.key}-img",{opacity:0,scale:.93,y:26},{opacity:1,scale:1,y:0,duration:1.05,ease:"power3.out"},0);
+    tl.fromTo("#${s.key}-img",{opacity:0.25,scale:.95,y:18},{opacity:1,scale:1,y:0,duration:1.05,ease:"power3.out"},0);
     tl.fromTo("#${s.key}-img",{rotation:-1.2},{rotation:0,duration:${d.toFixed(2)},ease:"none"},0);
     `;
   }
 
+  const customTimeline = s.customTimeline
+    ? (typeof s.customTimeline === "function" ? s.customTimeline({ scene: s, duration: d, timings, key: s.key }) : s.customTimeline)
+    : "";
+
   return `
     ${figureAnim}
-    tl.fromTo("#${s.key}-spot",{opacity:0},{opacity:1,duration:1.1,ease:"power2.out"},0);
+    ${customTimeline}
+    tl.fromTo("#${s.key}-spot",{opacity:0.2},{opacity:1,duration:1.1,ease:"power2.out"},0);
     tl.fromTo("#${s.key}-num",{opacity:0,y:-10},{opacity:1,y:0,duration:.5,ease:"power3.out"},.05);
     tl.fromTo("#${s.key}-en",{opacity:0},{opacity:1,duration:.5,ease:"power2.out"},.18);
     tl.fromTo("#${s.key}-rule",{height:0,opacity:0},{height:96,opacity:1,duration:.6,ease:"power3.out"},.24);
